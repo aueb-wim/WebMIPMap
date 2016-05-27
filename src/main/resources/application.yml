@@ -1,0 +1,26 @@
+security:
+  oauth2:
+    client:
+      clientId: 3c280491-7c51-404e-9df6-70666e54eea4
+      clientSecret: ANDzg_8vSJ8PTi7b6uYhA8AYJHGf8Pc7VwMMUzsTe2D9ES5aQVoO1NK-2ZIETwovQignZ7VDV_1gCJVrPfBUwd4
+      accessTokenUri: https://services.humanbrainproject.eu/oidc/token 
+      userAuthorizationUri: https://services.humanbrainproject.eu/oidc/authorize
+      authenticationScheme: query
+      clientAuthenticationScheme: form
+      scope: openid profile
+    resource:
+      userInfoUri: https://services.humanbrainproject.eu/oidc/userinfo
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+    
+multipart:
+  maxFileSize: 1Mb
+  maxRequestSize: 5Mb
+
+spring:
+  resources:
+    chain:
+      enabled: true
+      
