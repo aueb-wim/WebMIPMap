@@ -2,6 +2,28 @@ body {
 overflow-y:scroll; 
 }
 
+#hbp {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width:calc(100%);
+    height:calc(100%);
+    background-image: url("images/hbp.jpg");
+    background-repeat: no-repeat;
+    background-size:cover;
+}
+
+#login_hbp {
+    position: absolute;
+    left: 30px;
+    top: 20px;
+    color: white;
+}
+
+#login_hbp:visited {
+    color: #551A8B;
+}
+
 #leftdiv {
 width:250px;   
 height: 94vh;
