@@ -14,6 +14,7 @@ import gr.aueb.mipmapgui.controller.file.ActionOpenMappingTask;
 import gr.aueb.mipmapgui.controller.file.ActionRemoveMappingTask;
 import gr.aueb.mipmapgui.controller.file.ActionSaveMappingTask;
 import gr.aueb.mipmapgui.controller.file.ActionSelectMappingTask;
+import gr.aueb.mipmapgui.controller.file.ActionZipDirectory;
 import gr.aueb.mipmapgui.controller.mapping.ActionGenerateTransformations;
 import gr.aueb.mipmapgui.controller.mapping.ActionViewSql;
 import gr.aueb.mipmapgui.controller.mapping.ActionViewTGDs;
@@ -24,6 +25,12 @@ import gr.aueb.mipmapgui.view.tree.ActionDuplicateNode;
 import gr.aueb.mipmapgui.view.tree.ActionSelectionCondition;
 import it.unibas.spicy.persistence.DAOException;
 import it.unibas.spicygui.commons.Modello;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.security.Principal;
 import java.util.HashMap;
 import javax.servlet.http.HttpServletRequest;
@@ -34,6 +41,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 @RestController
 public class MappingController {
@@ -239,14 +248,26 @@ public class MappingController {
         return tgdsString;
     }
     
+    @RequestMapping(value="/DownloadMappingTask", method=RequestMethod.GET)
+    public byte[] downloadTask(HttpServletResponse response, @RequestParam("downloadName") String downloadName) throws IOException, Exception { 
+        String path = Costanti.SERVER_MAIN_FOLDER+Costanti.SERVER_FILES_FOLDER
+                       + user + "/" + downloadName;
+        ActionZipDirectory actionZipDir = new ActionZipDirectory(modello);
+        byte[] zip = actionZipDir.performAction(path);
+        response.reset();
+        response.setContentType("application/zip");
+        response.setHeader("Content-Disposition", "attachment; filename="+downloadName+".zip");         
+        return zip;
+    }
+    
     @ExceptionHandler(Exception.class)
     public String handleException(HttpServletRequest request, Exception ex){ 
         JSONObject outputObject = new JSONObject();
         //outputObject.put("exception","Server exception: "+ex.getClass().getName()+": "+ex.getMessage());
         outputObject.put("exception","Server exception: "+ex.getMessage());
         return outputObject.toJSONString();
-    }   
-               
+    }
+                       
     private void initialize(){
        if (this.modello == null) {
            modello = new Modello();

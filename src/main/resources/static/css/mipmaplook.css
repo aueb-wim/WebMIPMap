@@ -276,7 +276,7 @@ border-radius: 5px;
    color: #fff; 
 }
 
-#selection-condition, #save-task, #open-task, #delete-task
+#selection-condition, #save-task, #open-task, #delete-task, #download-task
 {
 background: #eee;
 display: block;
@@ -293,7 +293,7 @@ border-radius: 5px;
  width: 100%;
 }
 
-#open-task select, #delete-task select{
+#open-task select, #delete-task select, #download-task select{
 display: block;
 margin-left: auto;
 margin-right: auto;

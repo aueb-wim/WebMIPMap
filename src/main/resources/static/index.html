@@ -32,7 +32,7 @@
 </head>
 <body ng-app="app" ng-controller="home as home">
 	<div id="hbp" ng-show="!home.authenticated">
-            <h2 id="login_hbp">Login through the Human Brain Project Portal: <a href="/login">click here</a></h2>
+            <h2 id="login_hbp">Login through the Human Brain Project Portal: <a href="login">click here</a></h2>
 	</div>
 	<div ng-show="home.authenticated">
                 <div id="navMenu">
@@ -44,6 +44,7 @@
                     <li><a id="openTask">Open</a></li>
                     <li><a id="saveTask">Save</a></li>
                     <li><a id="deleteTask">Delete</a></li>
+                    <li><a id="downloadTask">Download</a></li>
                 </ul>
             </li>           
             <li>
@@ -89,7 +90,7 @@
 							$httpProvider.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 						}).controller("home", function($http, $location) {
 					var self = this;
-					$http.get("/user").success(function(data) {						
+					$http.get("user").success(function(data) {						
 						self.authenticated = true;
 					}).error(function() {						
 						self.authenticated = false;

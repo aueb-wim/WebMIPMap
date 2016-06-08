@@ -794,6 +794,42 @@ function createDeleteMappingTaskPopup(){
     }); 
 }
 
+//pop up window with download task options
+function createDownloadMappingTaskPopup(){
+    var download_task_text = '<form id="download-task" class="" action="#" title="Download Mapping Task and Files">\
+                          <label for="download_name">Choose a mapping task to download along with its files:</label><br><br>\n\
+                          <select id="download_name" name="download_name">';
+    for(var task = 0; task < savedTasks.length; task++){
+        download_task_text +='<option value="'+savedTasks[task]+'">'+savedTasks[task]+'</option>';
+    }
+    download_task_text +=  '</select><br><br></form>';
+    $('#dialog_container').append(download_task_text);
+    var dialog = $( "#download-task" ).dialog({
+      width : 410,
+      height : 190,
+      minWidth: 410,
+      minHeight: 190,
+      modal: true,
+       buttons: {
+        "OK": function(){ 
+           var downloadName=$("#download_name").val();
+           window.location = 'DownloadMappingTask?downloadName='+downloadName;  
+           dialog.dialog("close");
+            
+            
+        },
+        Cancel: function() {
+            dialog.dialog("close");
+        }
+      },
+      create: function(event, ui) { 
+        var widget = $(this).dialog("widget");
+      $(".ui-dialog-titlebar-close span", widget).removeClass("ui-icon-closethick").addClass("ui-icon-mine");
+      }
+      ,close: function(event, ui) { $(this).remove(); }
+    }); 
+}
+
 //pop up window with selection condition expression
 function createSelectionConditionPopup(item_id){
     var node_id = item_id.substring(0, item_id.length-7);    
@@ -2575,6 +2611,11 @@ $(document).ready(function(){
     //on clicking "Delete Task"
     $( "#deleteTask" ).click(function() {
         createDeleteMappingTaskPopup();
+    });
+    
+    //on clicking "Download Task"
+    $( "#downloadTask" ).click(function() {
+        createDownloadMappingTaskPopup();
     });
     
     //on clicking Export TGDs
