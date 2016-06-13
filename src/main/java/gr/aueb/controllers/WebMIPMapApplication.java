@@ -27,9 +27,9 @@ public class WebMIPMapApplication extends SpringBootServletInitializer {
 	SpringApplication.run(WebMIPMapApplication.class, args);
     }
     
-    @Override
+    /*@Override
     protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
         return application.sources(WebMIPMapApplication.class);
-    }  
+    } */
 
 }
