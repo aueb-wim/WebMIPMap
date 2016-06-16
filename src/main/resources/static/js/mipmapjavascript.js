@@ -1322,7 +1322,7 @@ function findExistingDuplicates(tree, JSONData, source){
            for (var i =0; i < JSONData.targetDuplications.length; i++){
                 tree.jstree(true).get_node(JSONData.targetDuplications[i].cloneNode).data.duplicate = true;    
                 //setting the correct number of duplication
-                setDuplicationNo(scenarioCounter, tree.jstree(true).get_node(JSONData.sourceDuplications[i].originalNode).text);              
+                setDuplicationNo(scenarioCounter, tree.jstree(true).get_node(JSONData.targetDuplications[i].originalNode).text);              
             }       
     }
     

@@ -8,6 +8,8 @@ security:
       authenticationScheme: query
       clientAuthenticationScheme: form
       scope: openid profile
+      use-current-uri: false
+      pre-established-redirect-uri: https://mip.humanbrainproject.eu/webmipmap/login
     resource:
       userInfoUri: https://services.humanbrainproject.eu/oidc/userinfo
 
