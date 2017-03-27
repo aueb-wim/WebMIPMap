@@ -3,6 +3,7 @@ package gr.aueb.controllers;
 import static gr.aueb.controllers.MappingController.user;
 import gr.aueb.file.DiscardBOM;
 import gr.aueb.mipmapgui.Costanti;
+import gr.aueb.mipmapgui.controller.file.MipmapDirectories;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -26,8 +27,7 @@ public class FileUploadController {
     public String handleFileSourceUpload(HttpServletRequest request, Principal principal) throws IOException, ServletException {
         JSONObject outputObject = new JSONObject();
         String user = principal.getName();
-        String path = Costanti.SERVER_MAIN_FOLDER+Costanti.SERVER_FILES_FOLDER
-                       + user + "/" + Costanti.SERVER_TEMP_FOLDER + Costanti.SERVER_SOURCE_FOLDER;        
+        String path = MipmapDirectories.getUserTempPath(user) + Costanti.SERVER_SOURCE_FOLDER;        
         String type = request.getParameter("inputTypeSource");
         Part sourceFilePart = request.getPart(type+"SchemaSource"); 
         uploadfile(path, sourceFilePart);            
@@ -38,8 +38,7 @@ public class FileUploadController {
     public String handleFileTargetUpload(HttpServletRequest request, Principal principal) throws IOException, ServletException {
         JSONObject outputObject = new JSONObject();
         String user = principal.getName();
-        String path = Costanti.SERVER_MAIN_FOLDER+Costanti.SERVER_FILES_FOLDER
-                       + user + "/" + Costanti.SERVER_TEMP_FOLDER + Costanti.SERVER_TARGET_FOLDER;                   
+        String path = MipmapDirectories.getUserTempPath(user) + Costanti.SERVER_TARGET_FOLDER;                   
         String type = request.getParameter("inputTypeTarget");
         Part targetFilePart = request.getPart(type+"SchemaTarget"); 
         uploadfile(path, targetFilePart);              
@@ -50,8 +49,7 @@ public class FileUploadController {
     public String handleFileSourceAdd(@RequestParam("fileName") String fileName, @RequestParam("firstLine") String firstLine, Principal principal) throws IOException  {
         JSONObject outputObject = new JSONObject();
         String user = principal.getName();
-        String path = Costanti.SERVER_MAIN_FOLDER+Costanti.SERVER_FILES_FOLDER
-                       + user + "/" + Costanti.SERVER_TEMP_FOLDER + Costanti.SERVER_SOURCE_FOLDER;   
+        String path = MipmapDirectories.getUserTempPath(user) + Costanti.SERVER_SOURCE_FOLDER;   
         addFile(path, fileName, firstLine);      
         return outputObject.toJSONString();
     }
@@ -60,8 +58,7 @@ public class FileUploadController {
     public String handleFileTargetAdd(@RequestParam("fileName") String fileName, @RequestParam("firstLine") String firstLine, Principal principal) throws IOException  {
         JSONObject outputObject = new JSONObject();
         String user = principal.getName();
-        String path = Costanti.SERVER_MAIN_FOLDER+Costanti.SERVER_FILES_FOLDER
-                       + user + "/" + Costanti.SERVER_TEMP_FOLDER + Costanti.SERVER_TARGET_FOLDER;   
+        String path = MipmapDirectories.getUserTempPath(user) + Costanti.SERVER_TARGET_FOLDER;   
         addFile(path, fileName, firstLine);                      
         return outputObject.toJSONString();
     }
@@ -70,8 +67,7 @@ public class FileUploadController {
     public String handleFileSourceRemove(@RequestParam("fileToDelete") String fileNameToDelete, Principal principal)  {
         JSONObject outputObject = new JSONObject();
         String user = principal.getName();
-        String path = Costanti.SERVER_MAIN_FOLDER+Costanti.SERVER_FILES_FOLDER
-                       + user + "/" + Costanti.SERVER_TEMP_FOLDER + Costanti.SERVER_SOURCE_FOLDER;   
+        String path = MipmapDirectories.getUserTempPath(user) + Costanti.SERVER_SOURCE_FOLDER;   
         removeFile(path, fileNameToDelete);            
         return outputObject.toJSONString();
     }
@@ -80,8 +76,7 @@ public class FileUploadController {
     public String handleFileTargetRemove(@RequestParam("fileToDelete") String fileNameToDelete, Principal principal)  {
         JSONObject outputObject = new JSONObject();
         String user = principal.getName();
-        String path = Costanti.SERVER_MAIN_FOLDER+Costanti.SERVER_FILES_FOLDER
-                       + user + "/" + Costanti.SERVER_TEMP_FOLDER + Costanti.SERVER_TARGET_FOLDER;   
+        String path = MipmapDirectories.getUserTempPath(user) + Costanti.SERVER_TARGET_FOLDER;   
         removeFile(path, fileNameToDelete);                      
         return outputObject.toJSONString();
     }

@@ -48,9 +48,9 @@ public final class ActionNewMappingTask{
     
     public ActionNewMappingTask(Modello modello, String user) {
         this.modello = modello;        
-        this.sourceDir = Costanti.SERVER_MAIN_FOLDER + Costanti.SERVER_FILES_FOLDER + user+ "/" + Costanti.SERVER_TEMP_FOLDER + Costanti.SERVER_SOURCE_FOLDER;
-        this.targetDir = Costanti.SERVER_MAIN_FOLDER + Costanti.SERVER_FILES_FOLDER + user+ "/" + Costanti.SERVER_TEMP_FOLDER + Costanti.SERVER_TARGET_FOLDER;
-        this.savedDir = Costanti.SERVER_MAIN_FOLDER + Costanti.SERVER_SCHEMATA_FOLDER;
+        this.sourceDir = MipmapDirectories.getUserTempPath(user) + Costanti.SERVER_SOURCE_FOLDER;
+        this.targetDir = MipmapDirectories.getUserTempPath(user) + Costanti.SERVER_TARGET_FOLDER;
+        this.savedDir = MipmapDirectories.getSavedSchemataPath();
     }
     
     public void performAction(HttpServletRequest request) throws DAOException {
@@ -252,10 +252,6 @@ public final class ActionNewMappingTask{
     private IDataSourceProxy loadCSVDataSource(CSVConfigurationPM configuration) throws DAOException {
         IDataSourceProxy dataSource = daoCsv.loadSchemaForWeb(scenarioNo, configuration.getSchemaPathList(), configuration.getDBName());
         return dataSource;        
-    }
-
-    public String getName() {
-        return Costanti.ACTION_NEW;
     }
     
     public JSONObject getSchemaTreesObject(){

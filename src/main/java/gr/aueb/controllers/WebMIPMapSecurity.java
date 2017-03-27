@@ -17,6 +17,7 @@ import org.springframework.boot.autoconfigure.security.oauth2.client.EnableOAuth
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.csrf.CsrfFilter;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.security.web.csrf.CsrfTokenRepository;
@@ -38,11 +39,12 @@ public class WebMIPMapSecurity extends WebSecurityConfigurerAdapter{
          
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
-                http.csrf().disable();		
+                //http.csrf().disable();		
                 // @formatter:off	
 		http.antMatcher("/**")
 			.authorizeRequests()
-				.antMatchers("/", "/login**").permitAll()                        
+				.antMatchers("/", "/login**").permitAll() 
+                                //.antMatchers("/SaveMappingTaskGlobal").hasRole("ADMIN")
 				.anyRequest().authenticated()
                         .and().logout().logoutSuccessUrl("/").permitAll()
                         .and().exceptionHandling().authenticationEntryPoint(new CustomLoginUrlAuthenticationEntryPoint("/login/hbp"))
@@ -78,5 +80,4 @@ public class WebMIPMapSecurity extends WebSecurityConfigurerAdapter{
 		return repository;
 	}
 
-    
 }

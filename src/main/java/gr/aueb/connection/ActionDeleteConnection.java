@@ -32,13 +32,13 @@ public class ActionDeleteConnection {
         }
     }
     
-    public void performActionAllConnections(String[] sourcePathArray, String[] targetPathArray) { 
+    public void performActionManyConnections(String[] sourcePathArray, String[] targetPathArray) { 
         HashMap<Integer, Scenario> scenarioMap = (HashMap) modello.getBean(Costanti.SCENARIO_MAPPER);
         Scenario scenario = scenarioMap.get(Integer.valueOf(scenarioNo));
         MappingTask mappingTask = scenario.getMappingTask();
         if (sourcePathArray!=null && targetPathArray!=null && sourcePathArray.length==targetPathArray.length){
             for (int i = 0; i < sourcePathArray.length; i++){
-                if(sourcePathArray[i]!=null&&targetPathArray[i]!=null&&!targetPathArray[i].equals("")){
+                if(sourcePathArray[i]!=null && targetPathArray[i]!=null && !targetPathArray[i].equals("")){
                     String fromPath = sourcePathArray[i];
                     String toPath = targetPathArray[i];
                     String key = fromPath + "->" + toPath;

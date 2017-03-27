@@ -65,10 +65,5 @@ public class ActionGenerateTransformations {
     public JSONObject getTGDs() {
         return this.TGDs;
     }
-   
-    public String getName() {
-        return Costanti.ACTION_SOLVING_MAPPING;
-    }
-
 
 }

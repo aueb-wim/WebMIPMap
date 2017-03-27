@@ -7,6 +7,7 @@ import gr.aueb.connection.ActionNewConnection;
 import gr.aueb.connection.ActionNewJoinCondition;
 import gr.aueb.mipmapgui.Costanti;
 import gr.aueb.mipmapgui.controller.Scenario;
+import gr.aueb.mipmapgui.controller.file.ActionLoadTrustedUserMappings;
 import gr.aueb.mipmapgui.controller.file.ActionDeleteMappingTask;
 import gr.aueb.mipmapgui.controller.file.ActionInitialize;
 import gr.aueb.mipmapgui.controller.file.ActionNewMappingTask;
@@ -15,6 +16,7 @@ import gr.aueb.mipmapgui.controller.file.ActionRemoveMappingTask;
 import gr.aueb.mipmapgui.controller.file.ActionSaveMappingTask;
 import gr.aueb.mipmapgui.controller.file.ActionSelectMappingTask;
 import gr.aueb.mipmapgui.controller.file.ActionZipDirectory;
+import gr.aueb.mipmapgui.controller.file.MipmapDirectories;
 import gr.aueb.mipmapgui.controller.mapping.ActionGenerateTransformations;
 import gr.aueb.mipmapgui.controller.mapping.ActionViewSql;
 import gr.aueb.mipmapgui.controller.mapping.ActionViewTGDs;
@@ -23,26 +25,24 @@ import gr.aueb.mipmapgui.controller.mapping.ActionViewXQuery;
 import gr.aueb.mipmapgui.view.tree.ActionDeleteDuplicateNode;
 import gr.aueb.mipmapgui.view.tree.ActionDuplicateNode;
 import gr.aueb.mipmapgui.view.tree.ActionSelectionCondition;
+import gr.aueb.users.ActionAnswerTrustRequest;
+import gr.aueb.users.ActionGetUsers;
+import gr.aueb.users.ActionSendTrustRequest;
+import gr.aueb.users.ActionUpdatePercentage;
 import it.unibas.spicy.persistence.DAOException;
 import it.unibas.spicygui.commons.Modello;
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.Principal;
 import java.util.HashMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.lang3.StringUtils;
 import org.json.simple.JSONObject;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 @RestController
 public class MappingController {
@@ -53,18 +53,52 @@ public class MappingController {
     @RequestMapping(value="/Initialize", method=RequestMethod.POST, produces="text/plain")
     //@ResponseBody
     public String initializeInfo(Principal principal) {
-        this.user = principal.getName();
+        MappingController.user = principal.getName();
+        
         initialize();
-        ActionInitialize actionInitialize = new ActionInitialize(modello);
+        ActionInitialize actionInitialize = new ActionInitialize();
         actionInitialize.performAction(user);
         JSONObject outputObject = actionInitialize.getJSONObject();
         return outputObject.toJSONString();
     }
     
+    @RequestMapping(value="/ListUsers", method=RequestMethod.POST, produces="text/plain")
+    public String getUsersInfo(Principal principal) {
+        ActionGetUsers actionGetUsers = new ActionGetUsers();
+        actionGetUsers.performAction(user);
+        JSONObject outputObject = actionGetUsers.getJSONObject();
+        return outputObject.toJSONString();
+    }
+    
+    //working - xarchakos
+    @RequestMapping(value="/LoadTrustedUserMappings", method=RequestMethod.POST, produces="text/plain")
+    public String loadTrustedUserMappings(@RequestParam("openName") String openName) {
+        ActionLoadTrustedUserMappings actionLoadTrustedUserMappings = new ActionLoadTrustedUserMappings();
+        actionLoadTrustedUserMappings.performAction(openName);
+        return actionLoadTrustedUserMappings.getMappings().toJSONString();
+    }
+
+    @RequestMapping(value="/sendTrustRequest", method=RequestMethod.POST, produces="text/plain")
+    public String sendTrustRequest(Principal principal, @RequestParam("userId") String id) {
+        ActionSendTrustRequest trustRequest = new ActionSendTrustRequest();
+        trustRequest.performAction(principal.getName(), id);
+        return trustRequest.getMessage().toJSONString();
+    }
+    
+    //working - xarchakos
+    @RequestMapping(value="/answerTrustRequest", method=RequestMethod.POST, produces="text/plain")
+    public String answerTrustRequest(Principal principal, @RequestParam("userId") String id, @RequestParam("statusCode") String statusCode) {
+        ActionAnswerTrustRequest answerTrustRequest = new ActionAnswerTrustRequest();
+        answerTrustRequest.performAction(principal.getName(), id, statusCode);
+        return answerTrustRequest.getMessage().toJSONString();
+    }
+    
+    
     @RequestMapping(value="/OpenMappingTask", method=RequestMethod.POST, produces="text/plain")
-    public String openMappingTaskInfo(@RequestParam("openName") String openName, @RequestParam("scenarioNo") String scenarioNo) {
+    public String openMappingTaskInfo(@RequestParam("openName") String openName, @RequestParam("scenarioNo") String scenarioNo, 
+            @RequestParam("global") boolean global, @RequestParam("userPublic") boolean userPublic, @RequestParam("trustedUser") String trustedUser) {
         ActionOpenMappingTask actionOpenMapTask = new ActionOpenMappingTask(modello, Integer.valueOf(scenarioNo));
-        actionOpenMapTask.performAction(openName, user);
+        actionOpenMapTask.performAction(openName, user, global, userPublic, trustedUser);
         JSONObject outputObject = actionOpenMapTask.getSchemaTreesObject();
         return outputObject.toJSONString();
     }
@@ -78,22 +112,89 @@ public class MappingController {
     }    
     
     @RequestMapping(value="/SaveMappingTask", method=RequestMethod.POST, produces="text/plain")
-    public String saveMappingTaskInfo(@RequestParam("saveName") String saveName, @RequestParam("scenarioNo") String scenarioNo) {
-        ActionSaveMappingTask actionSaveMapTask = new ActionSaveMappingTask(modello, Integer.valueOf(scenarioNo));
-        actionSaveMapTask.performAction(saveName, user);
+    public String saveMappingTaskInfo(@RequestParam("saveName") String saveName, @RequestParam("scenarioNo") String scenarioNo, 
+            @RequestParam("overwrite") boolean overwrite, @RequestParam(value="previousName", required=false) String previousName, 
+            @RequestParam(value="fromGlobal", required=false) boolean fromGlobal, @RequestParam(value="fromTrustedUser", required=false) String fromTrustedUser, 
+            @RequestParam(value="trustedUser", required=false) String trustedUser, @RequestParam(value="acceptedConns", required=false) String acceptedConns,
+            @RequestParam(value="totalConns", required=false) String totalConns) throws Exception {
+        
+        if ((previousName == null || previousName.equals("")) && overwrite)
+            throw new Exception("Cannot save mapping task.");
+        
+        ActionSaveMappingTask actionSaveMapTask = new ActionSaveMappingTask(modello, Integer.valueOf(scenarioNo)); 
+        boolean fromUser = Boolean.parseBoolean(fromTrustedUser);
+        actionSaveMapTask.performAction(saveName, user, overwrite, previousName, fromGlobal, fromUser, trustedUser, false, false);
+        if (fromUser && StringUtils.isNumeric(acceptedConns) && StringUtils.isNumeric(totalConns) && !user.equals(trustedUser)) {
+            Integer acceptedConnections = Integer.valueOf(acceptedConns);
+            Integer totalConnections = Integer.valueOf(totalConns);
+            if (totalConnections > 0) {
+                ActionUpdatePercentage updatePercentage = new ActionUpdatePercentage();
+                updatePercentage.performAction(trustedUser, acceptedConnections, totalConnections);
+            }
+        }
         JSONObject outputObject = new JSONObject();
         outputObject.put("saveName",saveName); 
         return outputObject.toJSONString();
-    }  
+    }
+    
+    @RequestMapping(value="/SaveMappingTaskGlobal", method=RequestMethod.POST, produces="text/plain")
+    public String saveMappingTaskGlobalInfo(HttpServletRequest request, @RequestParam("saveName") String saveName, @RequestParam("scenarioNo") String scenarioNo, 
+            @RequestParam("overwrite") boolean overwrite, @RequestParam(value="previousName", required=false) String previousName, 
+            @RequestParam(value="fromGlobal", required=false) boolean fromGlobal, @RequestParam(value="fromTrustedUser", required=false) boolean fromTrustedUser, 
+            @RequestParam(value="trustedUser", required=false) String trustedUser) throws Exception {
+                
+        //if (!request.isUserInRole("ROLE_ADMIN")) {  
+            if ((previousName == null || previousName.equals("")) && overwrite)
+                throw new Exception("Cannot save mapping task.");
+
+            ActionSaveMappingTask actionSaveMapTask = new ActionSaveMappingTask(modello, Integer.valueOf(scenarioNo));
+            actionSaveMapTask.performAction(saveName, user, overwrite, previousName, fromGlobal, fromTrustedUser, trustedUser, true, false);
+        //}
+        //else exception
+        JSONObject outputObject = new JSONObject();
+        outputObject.put("saveName",saveName);
+        
+        return outputObject.toJSONString();
+    }
+    
+    //working - xarchakos
+    //Possibly calculation and update of accepted connection
+    @RequestMapping(value="/SaveMappingTaskPublic", method=RequestMethod.POST, produces="text/plain")
+    public String SaveMappingTaskPublicInfo(HttpServletRequest request, @RequestParam("saveName") String saveName, @RequestParam("scenarioNo") String scenarioNo, 
+            @RequestParam("overwrite") boolean overwrite, @RequestParam(value="previousName", required=false) String previousName, 
+            @RequestParam(value="fromGlobal", required=false) boolean fromGlobal, @RequestParam(value="fromTrustedUser", required=false) boolean fromTrustedUser, 
+            @RequestParam(value="trustedUser", required=false) String trustedUser) throws Exception {
+            
+        if ((previousName == null || previousName.equals("")) && overwrite)
+            throw new Exception("Cannot save mapping task.");
+
+        ActionSaveMappingTask actionSaveMapTask = new ActionSaveMappingTask(modello, Integer.valueOf(scenarioNo));
+        actionSaveMapTask.performAction(saveName, user, overwrite, previousName, fromGlobal, fromTrustedUser, trustedUser, false, true);
+        JSONObject outputObject = new JSONObject();
+        outputObject.put("saveName",saveName);
+        
+        return outputObject.toJSONString();
+    }
+    
         
     @RequestMapping(value="/DeleteMappingTask", method=RequestMethod.POST, produces="text/plain")
     public String deleteMappingTaskInfo(@RequestParam("deleteName") String deleteName) {
         ActionDeleteMappingTask actionDeleteMapTask = new ActionDeleteMappingTask(modello);
-        actionDeleteMapTask.performAction(deleteName, user);
+        actionDeleteMapTask.performAction(deleteName, user, false);
         JSONObject outputObject = new JSONObject();
         outputObject.put("deleteName",deleteName);       
         return outputObject.toJSONString();
     }  
+    
+    //working - xarchakos
+    @RequestMapping(value="/DeleteMappingTaskPublic", method=RequestMethod.POST, produces="text/plain")
+    public String deleteMappingTaskInfoPublic(@RequestParam("deleteName") String deleteName) {
+        ActionDeleteMappingTask actionDeleteMapTask = new ActionDeleteMappingTask(modello);
+        actionDeleteMapTask.performAction(deleteName, user, true);
+        JSONObject outputObject = new JSONObject();
+        outputObject.put("deleteName",deleteName);       
+        return outputObject.toJSONString();
+    } 
     
     @RequestMapping(value="/EstablishedConnection", method=RequestMethod.POST, produces="text/plain")
     public String connectionInfo(@RequestParam(value="sourcePathArray[]",required=false) String[] sourcePathArray, @RequestParam("sourceValue") String sourceValueText,
@@ -129,8 +230,8 @@ public class MappingController {
     public String deleteAllConnectionsInfo(@RequestParam(value="sourcePathArray[]", required=false) String[] sourcePathArray, 
             @RequestParam(value="targetPathArray[]", required=false) String[] targetPathArray, @RequestParam("scenarioNo") String scenarioNo) {       
         ActionDeleteConnection deleteConnection = new ActionDeleteConnection(modello,scenarioNo);
-        deleteConnection.performActionAllConnections(sourcePathArray, targetPathArray); 
-        JSONObject outputObject = new JSONObject();
+        deleteConnection.performActionManyConnections(sourcePathArray, targetPathArray); 
+        JSONObject outputObject = new JSONObject();    
         return outputObject.toJSONString();
     } 
     
@@ -250,8 +351,7 @@ public class MappingController {
     
     @RequestMapping(value="/DownloadMappingTask", method=RequestMethod.GET)
     public byte[] downloadTask(HttpServletResponse response, @RequestParam("downloadName") String downloadName) throws IOException, Exception { 
-        String path = Costanti.SERVER_MAIN_FOLDER+Costanti.SERVER_FILES_FOLDER
-                       + user + "/" + downloadName;
+        String path = MipmapDirectories.getUserPrivatePath(user) + downloadName;
         ActionZipDirectory actionZipDir = new ActionZipDirectory(modello);
         byte[] zip = actionZipDir.performAction(path);
         response.reset();
@@ -259,6 +359,18 @@ public class MappingController {
         response.setHeader("Content-Disposition", "attachment; filename="+downloadName+".zip");         
         return zip;
     }
+    
+    @RequestMapping(value="/DownloadMappingTaskPublic", method=RequestMethod.GET)
+    public byte[] downloadTaskPublic(HttpServletResponse response, @RequestParam("downloadName") String downloadName) throws IOException, Exception { 
+        String path = MipmapDirectories.getUserPublicPath(user) + downloadName;
+        ActionZipDirectory actionZipDir = new ActionZipDirectory(modello);
+        byte[] zip = actionZipDir.performAction(path);
+        response.reset();
+        response.setContentType("application/zip");
+        response.setHeader("Content-Disposition", "attachment; filename="+downloadName+".zip");         
+        return zip;
+    }
+    
     
     @ExceptionHandler(Exception.class)
     public String handleException(HttpServletRequest request, Exception ex){ 

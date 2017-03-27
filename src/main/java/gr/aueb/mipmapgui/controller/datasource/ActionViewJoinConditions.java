@@ -36,19 +36,19 @@ public class ActionViewJoinConditions {
             IDataSourceProxy targetProxy = mappingTask.getTargetProxy();
             
             if ((sourceProxy.getJoinConditions().size() + targetProxy.getJoinConditions().size()) > 0) {          
-                for (JoinCondition sourceJoin: sourceProxy.getJoinConditions()){
-                   JSONObject joinObject = new JSONObject();                    
-                   INode iNodeSource = finder.findNodeInSchema(sourceJoin.getFromPaths().get(0), sourceProxy);                                        
-                   joinObject.put("sourceNode","sch_node" + iNodeSource.getValue());
-                   INode iNodeTarget = finder.findNodeInSchema(sourceJoin.getToPaths().get(0), sourceProxy);                                        
-                   joinObject.put("targetNode","sch_node" + iNodeTarget.getValue());
-                   joinObject.put("mandatory",sourceJoin.isMandatory());
-                   joinObject.put("fk",sourceJoin.isMonodirectional());
-                   joinsArray.add(joinObject);
-                
-                   String key = sourceJoin.getFromPaths().get(0)+"->"+sourceJoin.getToPaths().get(0);
-                   scenario.addJoinCondition(key, sourceJoin); 
-                }
+                sourceProxy.getJoinConditions().stream().forEach((sourceJoin) -> {
+                    JSONObject joinObject = new JSONObject();
+                    INode iNodeSource = finder.findNodeInSchema(sourceJoin.getFromPaths().get(0), sourceProxy);
+                    joinObject.put("sourceNode","sch_node" + iNodeSource.getValue());
+                    INode iNodeTarget = finder.findNodeInSchema(sourceJoin.getToPaths().get(0), sourceProxy);
+                    joinObject.put("targetNode","sch_node" + iNodeTarget.getValue());
+                    joinObject.put("mandatory",sourceJoin.isMandatory());
+                    joinObject.put("fk",sourceJoin.isMonodirectional());
+                    joinsArray.add(joinObject);
+                    
+                    String key = sourceJoin.getFromPaths().get(0)+"->"+sourceJoin.getToPaths().get(0);
+                    scenario.addJoinCondition(key, sourceJoin);
+                });
                 for (JoinCondition targetJoin: targetProxy.getJoinConditions()){
                    JSONObject joinObject = new JSONObject();                    
                    INode iNodeSource = finder.findNodeInSchema(targetJoin.getFromPaths().get(0), targetProxy);                                        

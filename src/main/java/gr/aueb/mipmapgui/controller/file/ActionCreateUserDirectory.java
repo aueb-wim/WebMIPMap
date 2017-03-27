@@ -1,37 +1,41 @@
 package gr.aueb.mipmapgui.controller.file;
 
 import gr.aueb.mipmapgui.Costanti;
-import it.unibas.spicygui.commons.Modello;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ActionCreateUserDirectory {
-    private Modello modello;
     
-    public ActionCreateUserDirectory(Modello modello) {
-        this.modello=modello;
-    }    
+    private List<Path> getUserDirectories(String user) {
+        List<Path> userDirectories = new ArrayList<>();
+        userDirectories.add(Paths.get(Costanti.SERVER_MAIN_FOLDER + Costanti.SERVER_SCHEMATA_FOLDER)); //is it safe to check every time?
+        userDirectories.add(Paths.get(Costanti.SERVER_MAIN_FOLDER + Costanti.SERVER_FILES_FOLDER)); //is it safe to check every time?
+        //user folder
+        userDirectories.add(Paths.get(Costanti.SERVER_MAIN_FOLDER + Costanti.SERVER_FILES_FOLDER + user));
+        //user sub-folders
+        userDirectories.add(Paths.get(Costanti.SERVER_MAIN_FOLDER + Costanti.SERVER_FILES_FOLDER + user + "/" + Costanti.SERVER_PRIVATE_USER_FOLDER));
+        userDirectories.add(Paths.get(Costanti.SERVER_MAIN_FOLDER + Costanti.SERVER_FILES_FOLDER + user + "/" + Costanti.SERVER_PUBLIC_USER_FOLDER));
+        userDirectories.add(Paths.get(Costanti.SERVER_MAIN_FOLDER + Costanti.SERVER_FILES_FOLDER + user + "/" + Costanti.SERVER_TEMP_FOLDER));
+        userDirectories.add(Paths.get(Costanti.SERVER_MAIN_FOLDER + Costanti.SERVER_FILES_FOLDER + user + "/" + Costanti.SERVER_TEMP_FOLDER 
+                + Costanti.SERVER_TEMP_TASKS_FOLDER));
+        userDirectories.add(Paths.get(Costanti.SERVER_MAIN_FOLDER + Costanti.SERVER_FILES_FOLDER + user + "/" + Costanti.SERVER_TEMP_FOLDER 
+                + Costanti.SERVER_TEMP_TASKS_FOLDER + Costanti.SERVER_SOURCE_FOLDER));
+        userDirectories.add(Paths.get(Costanti.SERVER_MAIN_FOLDER + Costanti.SERVER_FILES_FOLDER + user + "/" + Costanti.SERVER_TEMP_FOLDER 
+                + Costanti.SERVER_TEMP_TASKS_FOLDER + Costanti.SERVER_TARGET_FOLDER));
+        return userDirectories;
+    };
     
-    public void performAction(String user) {       
-            Path path_upload = Paths.get(Costanti.SERVER_MAIN_FOLDER + Costanti.SERVER_FILES_FOLDER);
-            if (!Files.exists(path_upload))
-                new File(path_upload.toString()).mkdir();
-
-            Path path_user = Paths.get(Costanti.SERVER_MAIN_FOLDER + Costanti.SERVER_FILES_FOLDER + user);
-            if (!Files.exists(path_user)){
-                //create user folder
-                new File(path_user.toString()).mkdir();
-                //create user sub-folders
-                new File(path_user + "/" + Costanti.SERVER_TEMP_FOLDER).mkdir();
-                new File(path_user + "/" + Costanti.SERVER_TEMP_FOLDER+ "/" + Costanti.SERVER_SOURCE_FOLDER).mkdir();
-                new File(path_user + "/" + Costanti.SERVER_TEMP_FOLDER+ "/" + Costanti.SERVER_TARGET_FOLDER).mkdir();
-            } 
-
-            Path path_schemata = Paths.get(Costanti.SERVER_MAIN_FOLDER + Costanti.SERVER_SCHEMATA_FOLDER);
-            if (!Files.exists(path_schemata))
-                new File(path_schemata.toString()).mkdir();
-
+    public ActionCreateUserDirectory() {}    
+    
+    public void performAction(String user) {          
+        for (Path path : getUserDirectories(user)) {
+            if (!Files.exists(path)) {
+                new File(path.toString()).mkdir();
+            }
+        }
     }   
 }

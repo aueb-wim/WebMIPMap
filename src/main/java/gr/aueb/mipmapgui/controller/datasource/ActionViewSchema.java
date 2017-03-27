@@ -73,9 +73,5 @@ public class ActionViewSchema {
     public JSONObject getSchemaTreesObject(){
         return this.treeObject;
     }
-    
-    public String getName() {
-        return Costanti.ACTION_SHOW_SCHEMA;
-    }
 
 }

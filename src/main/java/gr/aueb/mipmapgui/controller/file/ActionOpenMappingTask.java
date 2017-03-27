@@ -21,23 +21,16 @@
  */
 package gr.aueb.mipmapgui.controller.file;
 
+import static gr.aueb.controllers.MappingController.user;
 import it.unibas.spicy.model.mapping.MappingTask;
-import it.unibas.spicy.model.mapping.proxies.ConstantDataSourceProxy;
-import it.unibas.spicy.persistence.DAOException;
 import it.unibas.spicy.persistence.DAOMappingTask;
 import gr.aueb.mipmapgui.Costanti;
 import it.unibas.spicygui.commons.Modello;
-import it.unibas.spicygui.commons.LastActionBean;
 import gr.aueb.mipmapgui.controller.Scenario;
-import gr.aueb.mipmapgui.controller.datasource.ActionViewConnections;
-import gr.aueb.mipmapgui.controller.datasource.ActionViewJoinConditions;
-import gr.aueb.mipmapgui.controller.datasource.ActionViewSchema;
 import gr.aueb.mipmapgui.controller.datasource.operators.JSONTreeCreator;
 import java.io.File;
 import java.util.HashMap;
-import javax.servlet.http.HttpServletRequest;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.tools.FileObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
@@ -63,7 +56,7 @@ public class ActionOpenMappingTask {
             DAOMappingTask daoMappingTask = new DAOMappingTask();
             if (xmlFilter.accept(file)) {
                 mappingTask = daoMappingTask.loadMappingTask(scenarioNo, fileAbsoluteFile, true);
-                //
+                
                 scenario = gestioneScenario(file, mappingTask, false);
             } else {
                 ///throw new Exception
@@ -77,7 +70,7 @@ public class ActionOpenMappingTask {
     }
     
     private Scenario gestioneScenario(File file, MappingTask mappingTask, boolean TGDSession) {
-        Scenario scenario = new Scenario("Open Mapping Task Scenario "+scenarioNo, mappingTask, true, file);
+        Scenario scenario = new Scenario("Open Mapping Task Scenario " + scenarioNo, mappingTask, true, file);
         HashMap<Integer, Scenario> scenarioMap = (HashMap) modello.getBean(Costanti.SCENARIO_MAPPER);
         scenarioMap.put(scenarioNo, (Scenario) scenario);
         modello.putBean(Costanti.CURRENT_SCENARIO, scenario);  
@@ -85,9 +78,24 @@ public class ActionOpenMappingTask {
         return scenario;
     }
   
-    public void performAction(String openName, String user) {
+    public void performAction(String openName, String user, boolean global, boolean userPublic, String trustedUser) {
         Scenario scenario = null;
-        String mappingTaskFile = Costanti.SERVER_MAIN_FOLDER + Costanti.SERVER_FILES_FOLDER + user + "/" + openName +"/mapping_task.xml";
+        String mappingTaskFile;
+        if (global) {
+            mappingTaskFile = MipmapDirectories.getGlobalPath() + openName +"/mapping_task.xml";
+        }
+        else if (userPublic) {
+            //opens the public folder of the current user
+            if (trustedUser.equals("public_path")){
+                mappingTaskFile = MipmapDirectories.getUserPublicPath(user) + openName +"/mapping_task.xml";
+            //opens the public folder of a trusted user
+            } else {
+                mappingTaskFile = MipmapDirectories.getUserPublicPath(trustedUser) + openName +"/mapping_task.xml";
+            } 
+        }
+        else{
+            mappingTaskFile = MipmapDirectories.getUserPrivatePath(user) + openName +"/mapping_task.xml";
+        }
         File file = new File(mappingTaskFile);
         scenario = openCompositionFile(file.getPath(), file);
         
@@ -98,9 +106,4 @@ public class ActionOpenMappingTask {
     public JSONObject getSchemaTreesObject(){
         return this.treeObject;
     }
-
-    public String getName() {
-        return Costanti.ACTION_OPEN;
-    }
-
 }

@@ -1,6 +1,7 @@
 package gr.aueb.mipmapgui.controller.file;
 
 //giannisk
+import static gr.aueb.controllers.MappingController.user;
 import gr.aueb.mipmapgui.Costanti;
 import it.unibas.spicygui.commons.Modello;
 import java.io.File;
@@ -17,10 +18,14 @@ public class ActionDeleteMappingTask {
         this.modello=modello;
     }
     
-    public void performAction(String deleteName, String user){
+    public void performAction(String deleteName, String user, boolean isPublic){
         try {
-            //String mappingTaskdirectory = Costanti.SERVER_MAIN_FOLDER + Costanti.SERVER_FILES_FOLDER + deleteName;
-            String mappingTaskdirectory = Costanti.SERVER_MAIN_FOLDER + Costanti.SERVER_FILES_FOLDER + user + "/" + deleteName;
+            String mappingTaskdirectory;
+            if (isPublic) {
+                mappingTaskdirectory = MipmapDirectories.getUserPublicPath(user) + deleteName;
+            } else {
+                mappingTaskdirectory = MipmapDirectories.getUserPrivatePath(user) + deleteName;
+            }
             File directory = new File(mappingTaskdirectory);
             FileUtils.deleteDirectory(directory);
         } catch (IOException ex) {
