@@ -56,6 +56,7 @@ public class ActionNewConnection {
                 sourceValue = new DatetimeFunction();
             } 
             else if (sourceValueText.equalsIgnoreCase(SpicyEngineConstants.SOURCEVALUE_NEWID_FUNCTION)) {
+                System.out.println("ActionNewConnection: " + sourceValueText);
                 sourceValue = new NewIdFunction();
             } 
             else {
