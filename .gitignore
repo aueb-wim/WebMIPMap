@@ -1,1 +1,13 @@
-.DS_Store
+./src/.DS_Store
+./src/main/resources/.DS_Store
+./src/main/resources/static/.DS_Store
+./src/main/java/.DS_Store
+./src/main/java/gr/.DS_Store
+./src/main/java/gr/aueb/.DS_Store
+./src/main/java/gr/aueb/mipmapgui/view/.DS_Store
+./src/main/java/gr/aueb/mipmapgui/.DS_Store
+./src/main/java/gr/aueb/mipmapgui/controller/.DS_Store
+./src/main/.DS_Store
+./.DS_Store
+./.git/.DS_Store
+
