@@ -443,6 +443,62 @@ function addProjectTree(scenarioCnt){
 
 
 //xarchakos
+function createGetFromDbPanel(){
+    var form = '<form id="get-from-db" class="" action="#" title="Database Configuration">\
+        <div style="display: table;margin-top:10px;">\
+            <div style="display: table-row;">\
+                  <div style="display: table-cell;padding:10px;"> Driver: </div>\
+                    <div style="display: table-cell;"><select id="driver_selection">\
+                      <option value="postgreSQL" checked>org.postgresql.Driver</option>\
+                      <option value="mySql">com.mysql.jdbc.Driver</option>\
+                    </select></div>\
+            </div>\
+        <div style="display: table-row;">\<div style="display: table-cell;padding:10px;"> Uri: </div> <div style="display: table-cell;"><input id="uri_value" type="text" size="30" value="jdbc:postgresql://host/"></div></div>\
+        <div style="display: table-row;">\<div style="display: table-cell;padding:10px;"> Schema: </div> <div style="display: table-cell;"><input id="schema_value" type="text" size="30"></div></div>\
+        <div style="display: table-row;">\<div style="display: table-cell;padding:10px;"> Username: </div> <div style="display: table-cell;"><input id="username_value" type="text" size="30"></div></div>\
+        <div style="display: table-row;">\<div style="display: table-cell;padding:10px;"> Password: </div> <div style="display: table-cell;"><input id="password_value" type="password" size="30"></div></div>\
+        <div style="display: table-row;">\<div style="display: table-cell;padding:10px;"> Table: </div> <div style="display: table-cell;"><input id="table_value" type="text" size="30"></div></div>\
+        <div style="display: table-row;">\<div style="display: table-cell;padding:10px;"> Column: </div> <div style="display: table-cell;"><input id="column_value" type="text" size="30"></div></div>\
+        <div style="display: table-row;">\<div style="display: table-cell;padding:10px;"> Function: </div> <div style="display: table-cell;"><select id="function_selection"><br>\
+          <option value="max_function" checked>max</option><br>\
+        </select></div></div></div>\
+        </form>';
+    $('#dialog_container').append(form);
+    var dialog = $("#get-from-db").dialog({
+          width : 'auto',
+          height : 'auto',
+          minHeight: 450,
+          modal: true,
+           buttons: {
+            "OK": function(){
+                var driver = $("#driver_selection option:selected").text();
+                var uri = $('#uri_value').val();
+                var schema = $('#schema_value').val();
+                var username = $('#username_value').val();
+                var password = $('#password_value').val();
+                var table = $('#table_value').val();
+                var column = $('#column_value').val();
+                var function_value = $("#function_selection option:selected").text();
+                if(driver !== "" && uri !== "" && username !== "" && password !== "" && table !== "" && column !== "" && function_value !== ""){
+                    alert("ok");
+                } else {
+                    alert("Please complete all the necessary fields!"); 
+                }
+            },
+            Cancel: function() {
+            dialog.dialog("close");
+            }
+          },
+          create: function(event, ui) { 
+            var widget = $(this).dialog("widget");
+            $(".ui-dialog-titlebar-close span", widget).removeClass("ui-icon-closethick").addClass("ui-icon-mine");
+          }
+          ,close: function(event, ui) { $(this).remove(); }
+        });  
+    
+}
+
+//xarchakos
 //on doubleclicking on the constant menu, open options menu for the constant
 function createConstantOptionsPopup(item_id, newplumb){
     var previous_txt = $("#"+item_id).find(".span_hidden").text();
@@ -458,28 +514,28 @@ function createConstantOptionsPopup(item_id, newplumb){
           <option value="datetime()">datetime()</option>\
         </select>\
         <div id="offset_panel" style="display:none;">\
-        <div style="margin-top:10px;">\n\
-        <font size="5">Offset</font><br>\n\
+        <div style="margin-top:10px;">\
+        <p align="center" style="margin-top: 1em"> <font size="5" face="sans-serif"> Offset</font> </p> \
         <div style="display: table;margin-top:10px;">\
             <div style="display: table-row;">\
-                  <div style="display: table-cell;">\
+                  <div style="display: table-cell;padding:10px;">\
                     <div>Sequence Name</div>\
                   </div>\
                   <div style="display: table-cell;">\
-                    <button id="get_offset_db" type="button">Get offset</button>\
+                    <button id="get_offset_btn" type="button">Get offset</button>\
                   </div>\
             </div>\
             <div style="display: table-row;">\
-                  <div style="display: table-cell;">\
+                  <div style="display: table-cell;padding:10px;">\
                     <input id="sequence_value" type="text" size="5" >\
                   </div>\
                   <div style="display: table-cell;">\
-                    <input id="offset_value" type="text">\
+                    <input id="offset_value" type="text" size="5">\
                   </div>\
             </div>\
             <div style="display: table-row;">\
-                  <div style="display: table-cell;">\
-                    <input type="radio" name="offset_type" value="constant" id="constant" checked="checked">Constant<br>\
+                  <div style="display: table-cell;padding:10px;">\
+                    <input type="radio" name="offset_type" value="constant" id="constant" checked>Constant<br>\
                   </div>\
                   <div style="display: table-cell;">\
                     <input type="radio" name="offset_type" value="database" style="display: table-cell;" id="database">Database<br>\
@@ -3575,14 +3631,33 @@ $(document).on('click','.removeButton',function() {
  $(document).on('click','.constantOption' , function(){ 
      if ($(this).attr('id')==="stringOption" || $(this).attr('id')==="numberOption"){
         $('#func_selection').attr('disabled', true); 
-        $('#text_field').attr('disabled', false);        
+        $('#text_field').attr('disabled', false);   
+        $('#offset_panel').css('display','none');
      } 
      else if($(this).attr('id')==="funcOption"){
         $('#func_selection').attr('disabled', false); 
         $('#text_field').attr('disabled', true);
-     }
+     } 
      $('#text_field').removeClass( 'ui-state-error' );
  });
+ 
+ $(document).on('click','#driver_selection' , function(){ 
+     var selected_value = $("#driver_selection option:selected").text();
+     if (selected_value==="org.postgresql.Driver"){
+         $('#uri_value').val("jdbc:postgresql://host/database");
+     } else if (selected_value==="com.mysql.jdbc.Driver"){
+         $('#uri_value').val("jdbc:mysql://host/database");
+     }
+ });
+ 
+ 
+ $(document).on('click','#get_offset_btn' , function(){
+     if($('#sequence_value').val()!=="")
+        createGetFromDbPanel();
+     else
+         alert("Please set a sequence name!");
+ });
+ 
  
  $(document).on('click','#func_selection' , function(){
      var selected_value = $("#func_selection option:selected" ).text();
