@@ -441,6 +441,8 @@ function addProjectTree(scenarioCnt){
     $('#leftdiv'+scenarioCnt).css("background-color","#808080");
 }
 
+
+//xarchakos
 //on doubleclicking on the constant menu, open options menu for the constant
 function createConstantOptionsPopup(item_id, newplumb){
     var previous_txt = $("#"+item_id).find(".span_hidden").text();
@@ -454,9 +456,38 @@ function createConstantOptionsPopup(item_id, newplumb){
           <option value="newId()">newId()</option>\
           <option value="date()">date()</option>\
           <option value="datetime()">datetime()</option>\
-        </select> \
+        </select>\
+        <div id="offset_panel" style="display:none;">\
+        <div style="margin-top:10px;">\n\
+        <font size="5">Offset</font><br>\n\
+        <div style="display: table;margin-top:10px;">\
+            <div style="display: table-row;">\
+                  <div style="display: table-cell;">\
+                    <div>Sequence Name</div>\
+                  </div>\
+                  <div style="display: table-cell;">\
+                    <button id="get_offset_db" type="button">Get offset</button>\
+                  </div>\
+            </div>\
+            <div style="display: table-row;">\
+                  <div style="display: table-cell;">\
+                    <input id="sequence_value" type="text" size="5" >\
+                  </div>\
+                  <div style="display: table-cell;">\
+                    <input id="offset_value" type="text">\
+                  </div>\
+            </div>\
+            <div style="display: table-row;">\
+                  <div style="display: table-cell;">\
+                    <input type="radio" name="offset_type" value="constant" id="constant" checked="checked">Constant<br>\
+                  </div>\
+                  <div style="display: table-cell;">\
+                    <input type="radio" name="offset_type" value="database" style="display: table-cell;" id="database">Database<br>\
+                  </div>\
+            </div>\
+        </div>\
+        </div>\
         </form>';
-    
     function checkRegexp( o, regexp) {
         if ( !( regexp.test( o ) ) ) {
         return false;
@@ -470,7 +501,7 @@ function createConstantOptionsPopup(item_id, newplumb){
         var dialog = $("#constant-options").dialog({
           width : 'auto',
           height : 'auto',
-          minHeight: 260,
+          minHeight: 450,
           modal: true,
            buttons: {
             "OK": function(){
@@ -513,6 +544,11 @@ function createConstantOptionsPopup(item_id, newplumb){
                     $("#"+item_id).find(".span_hidden").html(result_string);
                     $("#"+item_id).find(".span_shown").html(shown_result);
                     $("#"+item_id).attr('title',result_string);
+                    if(result_string==="newId()"){
+//                        alert($("#sequence_value").val());
+//                        alert($("#offset_value").val());
+//                        alert($('input[name=offset_type]:checked', '#constant-options').val());
+                    }
                     updateConstantConnection(item_id, newplumb, result_string);
                     newplumb.repaintEverything();
                     dialog.dialog("close");
@@ -3238,7 +3274,7 @@ $(document).ready(function(){
             }
         }
       });  
-         
+                         
     //on clicking "New Mapping Task" :
     $( "#newTask" ).click(function() {
         //1.Append the html of the wizard panels
@@ -3547,6 +3583,16 @@ $(document).on('click','.removeButton',function() {
      }
      $('#text_field').removeClass( 'ui-state-error' );
  });
+ 
+ $(document).on('click','#func_selection' , function(){
+     var selected_value = $("#func_selection option:selected" ).text();
+     if (selected_value==="date()" || selected_value==="datetime()"){
+        $('#offset_panel').css('display','none');
+     } else {
+        $('#offset_panel').css('display','block');
+     }
+ });
+
 
 // bind click event to link for Schema Tree Window
 $(document).on('click','.schemaProjectTreeNode',function() {
