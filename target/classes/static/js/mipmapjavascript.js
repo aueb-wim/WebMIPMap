@@ -480,7 +480,8 @@ function createGetFromDbPanel(){
                 var column = $('#column_value').val();
                 var function_value = $("#function_selection option:selected").text();
                 if(driver !== "" && uri !== "" && username !== "" && password !== "" && table !== "" && column !== "" && function_value !== ""){
-                    alert("ok");
+                    var TEMP_DB_PROPERTIES = {driver:driver, uri:uri, schema:schema, username:username, password:password, table:table, column:column, function_value:function_value};
+                    alert(TEMP_DB_PROPERTIES.driver);
                 } else {
                     alert("Please complete all the necessary fields!"); 
                 }
