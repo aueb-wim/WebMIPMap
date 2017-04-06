@@ -20,14 +20,14 @@
  along with ++Spicy.  If not, see <http://www.gnu.org/licenses/>.
  */
 package gr.aueb.mipmapgui.controller.file;
-
-import static gr.aueb.controllers.MappingController.user;
 import it.unibas.spicy.model.mapping.MappingTask;
 import it.unibas.spicy.persistence.DAOMappingTask;
 import gr.aueb.mipmapgui.Costanti;
 import it.unibas.spicygui.commons.Modello;
 import gr.aueb.mipmapgui.controller.Scenario;
 import gr.aueb.mipmapgui.controller.datasource.operators.JSONTreeCreator;
+import it.unibas.spicy.model.correspondence.ValueCorrespondence;
+import it.unibas.spicy.utility.SpicyEngineConstants;
 import java.io.File;
 import java.util.HashMap;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -99,6 +99,8 @@ public class ActionOpenMappingTask {
         File file = new File(mappingTaskFile);
         scenario = openCompositionFile(file.getPath(), file);
         
+        System.out.println("openMappingTask" + SpicyEngineConstants.OFFSET_MAPPING.get("apto"));
+        System.out.println("open2: \t" + SpicyEngineConstants.GET_ID_FROM_DB.get("apto").getPassword());
         JSONTreeCreator treeCreator = new JSONTreeCreator(modello);
         this.treeObject = treeCreator.createSchemaTrees();
     }

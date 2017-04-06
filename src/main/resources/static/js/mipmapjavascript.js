@@ -13,7 +13,7 @@ var globalTasks; //global mapping tasks accessible to the user
 var userList; //MipMap users' list
 var availableUsers = []; //MipMap user name list with only purpose to append in smart search bar
 var pendingRequestList ; // Pending trust request list
-
+var TEMP_DB_PROPERTIES = new Object();
 var publicTasks; //trusted users' public mapping tasks
 var openedTasks = new Array(); //tasks currently open
 var loadedTasks = new Array(); //tasks that are either loaded or saved (overwritten) - not New
@@ -480,8 +480,8 @@ function createGetFromDbPanel(){
                 var column = $('#column_value').val();
                 var function_value = $("#function_selection option:selected").text();
                 if(driver !== "" && uri !== "" && username !== "" && password !== "" && table !== "" && column !== "" && function_value !== ""){
-                    var TEMP_DB_PROPERTIES = {driver:driver, uri:uri, schema:schema, username:username, password:password, table:table, column:column, function_value:function_value};
-                    alert(TEMP_DB_PROPERTIES.driver);
+                    TEMP_DB_PROPERTIES = {driver:driver, uri:uri, schema:schema, username:username, password:password, table:table, column:column, function_value:function_value};
+                    dialog.dialog("close");
                 } else {
                     alert("Please complete all the necessary fields!"); 
                 }
@@ -600,15 +600,36 @@ function createConstantOptionsPopup(item_id, newplumb){
                     }
                     $("#"+item_id).find(".span_hidden").html(result_string);
                     $("#"+item_id).find(".span_shown").html(shown_result);
-                    $("#"+item_id).attr('title',result_string);
+                    $("#"+item_id).attr('title',result_string+"");
                     if(result_string==="newId()"){
-//                        alert($("#sequence_value").val());
-//                        alert($("#offset_value").val());
-//                        alert($('input[name=offset_type]:checked', '#constant-options').val());
-                    }
-                    updateConstantConnection(item_id, newplumb, result_string);
-                    newplumb.repaintEverything();
-                    dialog.dialog("close");
+                        var sequence_input_type = $('input[name=offset_type]:checked', '#constant-options').val();
+                        var sequence_name = $("#sequence_value").val();
+                        $("#"+item_id).find(".span_hidden").html(result_string+"_"+sequence_name);
+                        $("#"+item_id).find(".span_shown").html(shown_result+"_"+sequence_name);
+                        $("#"+item_id).attr('title',result_string+"_"+sequence_name);
+                        if(sequence_input_type === "database"){
+                            if(typeof TEMP_DB_PROPERTIES.driver === "undefined" ){
+                                alert("Please setup the database configuration!");
+                            } else {
+                                
+                                var offset_value = $("#offset_value").val();
+
+                                updateConstantConnection(item_id, newplumb, result_string, sequence_name, offset_value, sequence_input_type, TEMP_DB_PROPERTIES);
+                                newplumb.repaintEverything();
+                                dialog.dialog("close");
+                            }
+                        } else if(sequence_input_type === "constant"){
+                            var offset_value = $("#offset_value").val();
+                            updateConstantConnection(item_id, newplumb, result_string, sequence_name, offset_value, sequence_input_type, null);
+                            newplumb.repaintEverything();
+                            dialog.dialog("close");
+                        }
+                            
+                    } else {
+                        updateConstantConnection(item_id, newplumb, result_string, null, null, null, null);
+                        newplumb.repaintEverything();
+                        dialog.dialog("close");
+                    }                    
                 }
                 else{
                     alert(error_msg);
@@ -887,7 +908,7 @@ function createLoadMappingTaskPopup(){
       minHeight: 210,
       modal: true,
       buttons: {
-        "OK": function(){                
+        "OK": function(){
             var openName=$("#open_name").val();                         
             lastAction = "open";
             var newScenarioNo = scenarioCounter+1;
@@ -904,6 +925,8 @@ function createLoadMappingTaskPopup(){
                     alert(obj.exception);
                 } 
                 else{
+                    console.log(responseText);
+                    console.log(obj);
                     loadSchemaTrees(openName, obj, false, false);
                     openedTasks.push(openName);
                     loadedTasks.push(newScenarioNo);
@@ -1995,7 +2018,10 @@ function setDuplicationNo(counter, original_text){
 }
 
 //function that checks if a connection from a constant exists and updates its value
-function updateConstantConnection(id, newplumb, newValue){   
+function updateConstantConnection(id, newplumb, newValue, sequence_name, offset_value, sequence_input_type, db_properties){
+    alert(offset_value);
+    alert(newValue);
+    alert(sequence_name);
     var existing_conns = newplumb.getConnections({ source: $('#'+id).find('.span_shown').attr('id') });
     if(existing_conns.length  !== 0){
         for (var i=0; i< existing_conns.length; i++){
@@ -2008,7 +2034,7 @@ function updateConstantConnection(id, newplumb, newValue){
                         xhr.setRequestHeader("X-XSRF-TOKEN", csrftoken);
                 }
               } ).done(function(responseText) {
-                var obj = $.parseJSON(responseText); 
+                var obj = $.parseJSON(responseText);
                 if(obj.hasOwnProperty("exception")){
                     alert(obj.exception);                    
                 }
@@ -2076,7 +2102,13 @@ function createExistingConnections(connections, joins, newplumb, global, public)
                 }
                 else if (connections[i].connectionType === "constant"){
                     //check if a constant icon with the same value has already been created, if not create one
-                    if($.inArray(connections[i].sourceValue, constantValues) === -1){
+                    var toCheck;
+                    if(connections[i].sequence !== null){
+                        toCheck = connections[i].sourceValue + "_" + connections[i].sequence;
+                    } else {
+                        toCheck = connections[i].sourceValue;
+                    }
+                    if($.inArray(toCheck, constantValues) === -1){
                         if ((iconsNo%maxIcons)===maxIcons){
                             shift = maxIcons;
                         }
@@ -2095,7 +2127,13 @@ function createExistingConnections(connections, joins, newplumb, global, public)
                         $("#constant-menu-span"+currentmenucounter).html(constantValueShown);
                         $("#constant-menu-span_hidden"+currentmenucounter).html(connections[i].sourceValue);
                         $("#constant-menu"+currentmenucounter).attr('title',connections[i].sourceValue);
-                        constantValues.push(connections[i].sourceValue);
+                        alert(connections[i].sequence);
+                        if(connections[i].sequence !== null){
+                            $("#constant-menu-span"+currentmenucounter).html(constantValueShown+"_"+connections[i].sequence);
+                            $("#constant-menu-span_hidden"+currentmenucounter).html(connections[i].sourceValue+"_" + connections[i].sequence);
+                            $("#constant-menu"+currentmenucounter).attr('title',connections[i].sourceValue+"_" + connections[i].sequence);
+                        }
+                        constantValues.push(toCheck);
                         constantMap[connections[i].sourceValue] = currentmenucounter;
                     }
                     //if a constant icon with the same value has already been created find the corresponding one

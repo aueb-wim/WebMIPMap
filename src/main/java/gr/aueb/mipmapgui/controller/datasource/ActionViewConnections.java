@@ -10,6 +10,8 @@ import it.unibas.spicy.model.paths.PathExpression;
 import gr.aueb.mipmapgui.Costanti;
 import it.unibas.spicygui.commons.Modello;
 import gr.aueb.mipmapgui.controller.Scenario;
+import it.unibas.spicy.model.correspondence.GetIdFromDb;
+import it.unibas.spicy.utility.SpicyEngineConstants;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -38,6 +40,12 @@ public class ActionViewConnections {
                      if (valueCorrespondence.getSourceValue() != null) {
                          connectionObject.put("connectionType","constant");
                          connectionObject.put("sourceValue",valueCorrespondence.getSourceValue().toString());
+                         connectionObject.put("constantType", valueCorrespondence.getSourceValue().getType());
+                         String sequenceName = valueCorrespondence.getSourceValue().getSequence();
+                         connectionObject.put("sequence", sequenceName);
+                         connectionObject.put("offset", SpicyEngineConstants.OFFSET_MAPPING.get(sequenceName));
+//                         GetIdFromDb objDb = SpicyEngineConstants.GET_ID_FROM_DB.get(sequenceName);
+//                         connectionObject.put("dbDriver", objDb.getDriver());
                          connectionObject.put("transformationFunction",null);
                          connectionObject.put("sourceNode",null);
                          INode iNodeTarget = finder.findNodeInSchema(valueCorrespondence.getTargetPath(), mappingTask.getTargetProxy());
