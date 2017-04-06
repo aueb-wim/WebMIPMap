@@ -499,15 +499,37 @@ function createGetFromDbPanel(){
     
 }
 
+function isNumber(n) {
+  return !isNaN(parseFloat(n)) && isFinite(n);
+}
+
 //xarchakos
 //on doubleclicking on the constant menu, open options menu for the constant
-function createConstantOptionsPopup(item_id, newplumb){
-    var previous_txt = $("#"+item_id).find(".span_hidden").text();
+function createConstantOptionsPopup(item_id, newplumb, constants){
+    var constant_num = item_id.split("constant-menu")[1];
+    if(constants !== null)
+        alert(constants[constant_num].sequence);
+    var connection_text = $("#"+item_id).find(".span_hidden").text();
+    var constant_value = "";
+    var newIdChecked, stringChecked, numberChecked = "";
+    if(connection_text.split("_")[0] === "newId()" ){
+        newIdChecked = "checked";
+        $('#func_selection').attr('disabled', false); 
+        $('#text_field').attr('disabled', true);
+    } else {
+        constant_value = connection_text;
+        if(isNumber(connection_text)){
+            numberChecked = "checked";
+        } else {
+            stringChecked = "checked";
+        }
+    }
+    
     var constant_form_text = '<form id="constant-options" class="" action="#" title="Constant options">\
-        <input type="radio" name="type" class="constantOption" id="stringOption" value="string" checked>String<br>\
-        <input type="radio" name="type" class="constantOption" id="numberOption" value="number">Number<br>\
-        <input type="radio" name="type" class="constantOption" id="funcOption" value="function">Function<br><br>\
-        <input autofocus id="text_field" type="text" name="constant_value" value='+previous_txt+'><br><br>\
+        <input type="radio" name="type" class="constantOption" id="stringOption" value="string" '+ stringChecked +'>String<br>\
+        <input type="radio" name="type" class="constantOption" id="numberOption" value="number" '+ numberChecked +'>Number<br>\
+        <input type="radio" name="type" class="constantOption" id="funcOption" value="function" '+ newIdChecked +'>Function<br><br>\
+        <input autofocus id="text_field" type="text" name="constant_value" value='+constant_value+'><br><br>\
         <select id="func_selection" disabled>\
           <option selected disabled hidden value=""></option>\
           <option value="newId()">newId()</option>\
@@ -2019,9 +2041,6 @@ function setDuplicationNo(counter, original_text){
 
 //function that checks if a connection from a constant exists and updates its value
 function updateConstantConnection(id, newplumb, newValue, sequence_name, offset_value, sequence_input_type, db_properties){
-    alert(offset_value);
-    alert(newValue);
-    alert(sequence_name);
     var existing_conns = newplumb.getConnections({ source: $('#'+id).find('.span_shown').attr('id') });
     if(existing_conns.length  !== 0){
         for (var i=0; i< existing_conns.length; i++){
@@ -2116,7 +2135,7 @@ function createExistingConnections(connections, joins, newplumb, global, public)
                             shift = iconsNo%maxIcons;
                         }
                         //the icon's position depends on the number of icons already on the current tab
-                        createConstant("maindivcenter"+currentScenario, positionX+shift*shiftXpixels, positionY+iconsNo*shiftYpixels, newplumb); 
+                        createConstant("maindivcenter"+currentScenario, positionX+shift*shiftXpixels, positionY+iconsNo*shiftYpixels, newplumb, connections); 
                         iconsNo++;
                         //menucounter has already been increased, so the current one is 1 less
                         currentmenucounter = menucounter-1;
@@ -2127,7 +2146,6 @@ function createExistingConnections(connections, joins, newplumb, global, public)
                         $("#constant-menu-span"+currentmenucounter).html(constantValueShown);
                         $("#constant-menu-span_hidden"+currentmenucounter).html(connections[i].sourceValue);
                         $("#constant-menu"+currentmenucounter).attr('title',connections[i].sourceValue);
-                        alert(connections[i].sequence);
                         if(connections[i].sequence !== null){
                             $("#constant-menu-span"+currentmenucounter).html(constantValueShown+"_"+connections[i].sequence);
                             $("#constant-menu-span_hidden"+currentmenucounter).html(connections[i].sourceValue+"_" + connections[i].sequence);
@@ -2244,7 +2262,7 @@ function acceptConnection(con) {
 
 //creates Constant draggable icon, makes it source for connections
 //and binds it with click and doubleclick events
-function createConstant(id, relativeX, relativeY, newplumb){
+function createConstant(id, relativeX, relativeY, newplumb, constants){
     $("#"+id).append("<div id='constant-menu"+menucounter+"' class='constant-menu ui-widget-content'>\
                         <img src='css/images/constant.jpg' alt='constant_symbol' height='30' width='30'>\
                         <span id='constant-menu-span"+menucounter+"' class='span_shown'></span>\
@@ -2266,7 +2284,7 @@ function createConstant(id, relativeX, relativeY, newplumb){
         createContextMenu4(newplumb,$(this).attr('id'),e);
     });
     $("#constant-menu"+menucounter).bind("dblclick",function (e) {
-        createConstantOptionsPopup($(this).attr('id'),newplumb);
+        createConstantOptionsPopup($(this).attr('id'),newplumb,constants);
     });
     menucounter++; 
 }
@@ -2696,7 +2714,7 @@ function createContextMenu3(newplumb,id,event){
         switch($(this).attr("data-action")) {
             case "constant":
                 $(".custom-menu").remove();
-                createConstant(id,relativeX,relativeY,newplumb);
+                createConstant(id,relativeX,relativeY,newplumb,null);
                 break;
             case "function":
                 $(".custom-menu").remove();
