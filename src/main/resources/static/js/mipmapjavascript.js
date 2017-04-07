@@ -520,7 +520,7 @@ function isNumber(n) {
 //xarchakos
 //on doubleclicking on the constant menu, open options menu for the constant
 function createConstantOptionsPopup(item_id, newplumb, constants){
-    //retrieve the text in the UI constant widget
+    //retrieve the label of the UI constant widget
     var connection_text = $("#"+item_id).find(".span_hidden").text();
     var constant_value = "";
     var newIdChecked, stringChecked, numberChecked = "";
@@ -3776,7 +3776,7 @@ $(document).on('click','.removeButton',function() {
      var selected_value = $("#func_selection option:selected" ).text();
      if (selected_value==="date()" || selected_value==="datetime()"){
         $('#offset_panel').css('display','none');
-     } else {
+     } else if (selected_value==="newId()"){
         $('#offset_panel').css('display','block');
      }
  });
