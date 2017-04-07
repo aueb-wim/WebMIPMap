@@ -44,8 +44,17 @@ public class ActionViewConnections {
                          String sequenceName = valueCorrespondence.getSourceValue().getSequence();
                          connectionObject.put("sequence", sequenceName);
                          connectionObject.put("offset", SpicyEngineConstants.OFFSET_MAPPING.get(sequenceName));
-//                         GetIdFromDb objDb = SpicyEngineConstants.GET_ID_FROM_DB.get(sequenceName);
-//                         connectionObject.put("dbDriver", objDb.getDriver());
+                         GetIdFromDb objDb = SpicyEngineConstants.GET_ID_FROM_DB.get(sequenceName);
+                         if(objDb != null){
+                            connectionObject.put("dbDriver", objDb.getDriver());
+                            connectionObject.put("dbUri", objDb.getUri());
+                            connectionObject.put("dbSchema", objDb.getSchema());
+                            connectionObject.put("dbUsername", objDb.getLogin());
+                            connectionObject.put("dbPassword", objDb.getPassword());
+                            connectionObject.put("dbTable", objDb.getTable());
+                            connectionObject.put("dbColumn", objDb.getColumn());
+                            connectionObject.put("dbFunction", objDb.getFunction());
+                         }
                          connectionObject.put("transformationFunction",null);
                          connectionObject.put("sourceNode",null);
                          INode iNodeTarget = finder.findNodeInSchema(valueCorrespondence.getTargetPath(), mappingTask.getTargetProxy());

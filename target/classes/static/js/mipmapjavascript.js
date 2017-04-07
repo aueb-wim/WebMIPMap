@@ -460,10 +460,21 @@ function createGetFromDbPanel(){
         <div style="display: table-row;">\<div style="display: table-cell;padding:10px;"> Table: </div> <div style="display: table-cell;"><input id="table_value" type="text" size="30"></div></div>\
         <div style="display: table-row;">\<div style="display: table-cell;padding:10px;"> Column: </div> <div style="display: table-cell;"><input id="column_value" type="text" size="30"></div></div>\
         <div style="display: table-row;">\<div style="display: table-cell;padding:10px;"> Function: </div> <div style="display: table-cell;"><select id="function_selection"><br>\
-          <option value="max_function" checked>max</option><br>\
+          <option value="max" checked>max</option><br>\
         </select></div></div></div>\
         </form>';
+    
     $('#dialog_container').append(form);
+    if(TEMP_DB_PROPERTIES !== null){
+        $("#driver_value").val(TEMP_DB_PROPERTIES.driver).change();
+        $('#uri_value').val(TEMP_DB_PROPERTIES.uri);
+        $('#schema_value').val(TEMP_DB_PROPERTIES.schema);
+        $('#username_value').val(TEMP_DB_PROPERTIES.username);
+        $('#password_value').val(TEMP_DB_PROPERTIES.password);
+        $('#table_value').val(TEMP_DB_PROPERTIES.table);
+        $('#column_value').val(TEMP_DB_PROPERTIES.column);
+        $("#function_selection").val(TEMP_DB_PROPERTIES.function_value).change();
+    }
     var dialog = $("#get-from-db").dialog({
           width : 'auto',
           height : 'auto',
@@ -506,16 +517,24 @@ function isNumber(n) {
 //xarchakos
 //on doubleclicking on the constant menu, open options menu for the constant
 function createConstantOptionsPopup(item_id, newplumb, constants){
-    var constant_num = item_id.split("constant-menu")[1];
-    if(constants !== null)
-        alert(constants[constant_num].sequence);
+    //retrieve the text in the UI constant widget
     var connection_text = $("#"+item_id).find(".span_hidden").text();
     var constant_value = "";
     var newIdChecked, stringChecked, numberChecked = "";
+    var offset_type, offset;
     if(connection_text.split("_")[0] === "newId()" ){
+        //find the existing database properties for getId type of offset
+        if(constants !== null){
+            for (var i in constants){
+                if(constants[i].sequence === connection_text.split("_")[1]){
+                    offset_type = constants[i].constantType;
+                    offset = constants[i].offset;
+                    TEMP_DB_PROPERTIES = {driver:constants[i].dbDriver, uri:constants[i].dbUri, schema:constants[i].dbSchema, username:constants[i].dbUsername, 
+                        password:constants[i].dbPassword, table:constants[i].dbTable, column:constants[i].dbColumn, function_value:constants[i].dbFunction};
+                }
+            }
+        }
         newIdChecked = "checked";
-        $('#func_selection').attr('disabled', false); 
-        $('#text_field').attr('disabled', true);
     } else {
         constant_value = connection_text;
         if(isNumber(connection_text)){
@@ -576,6 +595,24 @@ function createConstantOptionsPopup(item_id, newplumb, constants){
     }
     
     $('#dialog_container').append(constant_form_text);
+    
+    // add existing newId settings to UI
+    if(connection_text.split("_")[0] === "newId()" ){
+        $('#text_field').prop('disabled', 'disabled');
+        $('#func_selection').prop('disabled', false);
+        $("#func_selection").val("newId()").change();
+        $('#offset_panel').css('display','block');
+        $('#sequence_value').val(connection_text.split("_")[1]);
+        if(offset_type === "constant"){
+            $('#offset_value').val(offset);
+        } else if(offset_type === "getId()"){
+            $("#database").prop("checked", true);
+        }
+    } else if (connection_text.split("_")[0] === "date()"){
+        $("#func_selection").val("date()").change();
+    } else if (connection_text.split("_")[0] === "datetime()"){
+        $("#func_selection").val("datetime()").change();
+    }
     //Dialog Setup
         var dialog = $("#constant-options").dialog({
           width : 'auto',
@@ -947,8 +984,6 @@ function createLoadMappingTaskPopup(){
                     alert(obj.exception);
                 } 
                 else{
-                    console.log(responseText);
-                    console.log(obj);
                     loadSchemaTrees(openName, obj, false, false);
                     openedTasks.push(openName);
                     loadedTasks.push(newScenarioNo);
