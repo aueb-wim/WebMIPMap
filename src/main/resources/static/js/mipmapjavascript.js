@@ -14,6 +14,8 @@ var userList; //MipMap users' list
 var availableUsers = []; //MipMap user name list with only purpose to append in smart search bar
 var pendingRequestList ; // Pending trust request list
 var TEMP_DB_PROPERTIES = new Object();
+var GET_ID_FROM_DB = new Map();
+var OFFSET_MAPPING = new Map();
 var publicTasks; //trusted users' public mapping tasks
 var openedTasks = new Array(); //tasks currently open
 var loadedTasks = new Array(); //tasks that are either loaded or saved (overwritten) - not New
@@ -465,7 +467,8 @@ function createGetFromDbPanel(){
         </form>';
     
     $('#dialog_container').append(form);
-    if(TEMP_DB_PROPERTIES !== null){
+    //if an offset is get from database the db properties in the UI must be filled 
+    if(!$.isEmptyObject(TEMP_DB_PROPERTIES)){
         $("#driver_value").val(TEMP_DB_PROPERTIES.driver).change();
         $('#uri_value').val(TEMP_DB_PROPERTIES.uri);
         $('#schema_value').val(TEMP_DB_PROPERTIES.schema);
@@ -522,18 +525,19 @@ function createConstantOptionsPopup(item_id, newplumb, constants){
     var constant_value = "";
     var newIdChecked, stringChecked, numberChecked = "";
     var offset_type, offset;
+    var selected_sequence = connection_text.split("_")[1];
+    //found which constant widget is selected and set the appropriate settings in the UI panel
     if(connection_text.split("_")[0] === "newId()" ){
         //find the existing database properties for getId type of offset
-        if(constants !== null){
-            for (var i in constants){
-                if(constants[i].sequence === connection_text.split("_")[1]){
-                    offset_type = constants[i].constantType;
-                    offset = constants[i].offset;
-                    TEMP_DB_PROPERTIES = {driver:constants[i].dbDriver, uri:constants[i].dbUri, schema:constants[i].dbSchema, username:constants[i].dbUsername, 
-                        password:constants[i].dbPassword, table:constants[i].dbTable, column:constants[i].dbColumn, function_value:constants[i].dbFunction};
-                }
+        if(OFFSET_MAPPING.has(selected_sequence)){
+            if(GET_ID_FROM_DB.has(selected_sequence)){
+                offset_type = "getId()";
+            } else {
+                offset_type = "constant";
             }
         }
+        offset = OFFSET_MAPPING.get(selected_sequence);
+        TEMP_DB_PROPERTIES = GET_ID_FROM_DB.get(selected_sequence);
         newIdChecked = "checked";
     } else {
         constant_value = connection_text;
@@ -665,23 +669,32 @@ function createConstantOptionsPopup(item_id, newplumb, constants){
                         var sequence_name = $("#sequence_value").val();
                         $("#"+item_id).find(".span_hidden").html(result_string+"_"+sequence_name);
                         $("#"+item_id).find(".span_shown").html(shown_result+"_"+sequence_name);
-                        $("#"+item_id).attr('title',result_string+"_"+sequence_name);
+                        $("#"+item_id).attr('title',result_string+"_"+sequence_name);                                                
                         if(sequence_input_type === "database"){
-                            if(typeof TEMP_DB_PROPERTIES.driver === "undefined" ){
+                            if($.isEmptyObject(TEMP_DB_PROPERTIES)){
                                 alert("Please setup the database configuration!");
                             } else {
-                                
+                                //TODO - get value from database ( call to DB )
                                 var offset_value = $("#offset_value").val();
-
+                                //update global entries if an offset from db is valid
+                                GET_ID_FROM_DB.set(sequence_name, TEMP_DB_PROPERTIES);
+                                OFFSET_MAPPING.set(sequence_name, offset_value);
+                                TEMP_DB_PROPERTIES = null;
                                 updateConstantConnection(item_id, newplumb, result_string, sequence_name, offset_value, sequence_input_type, TEMP_DB_PROPERTIES);
                                 newplumb.repaintEverything();
                                 dialog.dialog("close");
                             }
                         } else if(sequence_input_type === "constant"){
-                            var offset_value = $("#offset_value").val();
-                            updateConstantConnection(item_id, newplumb, result_string, sequence_name, offset_value, sequence_input_type, null);
-                            newplumb.repaintEverything();
-                            dialog.dialog("close");
+                            //the offset must be numeric
+                            if($("#offset_value").val()==="" || !isNumber($("#offset_value").val())){
+                                alert("Please set a valid offset!");
+                            } else {
+                                var offset_value = $("#offset_value").val();
+                                OFFSET_MAPPING.set(sequence_name, offset_value);
+                                updateConstantConnection(item_id, newplumb, result_string, sequence_name, offset_value, sequence_input_type, null);
+                                newplumb.repaintEverything();
+                                dialog.dialog("close");
+                            }
                         }
                             
                     } else {
@@ -2159,6 +2172,14 @@ function createExistingConnections(connections, joins, newplumb, global, public)
                     var toCheck;
                     if(connections[i].sequence !== null){
                         toCheck = connections[i].sourceValue + "_" + connections[i].sequence;
+                        TEMP_DB_PROPERTIES = {driver:connections[i].dbDriver, uri:connections[i].dbUri, schema:connections[i].dbSchema, 
+                            username:connections[i].dbUsername, password:connections[i].dbPassword, table:connections[i].dbTable,
+                            column:connections[i].dbColumn, function_value:connections[i].dbFunction};
+                        OFFSET_MAPPING.set(connections[i].sequence, connections[i].offset);
+                        if(typeof TEMP_DB_PROPERTIES.driver !== "undefined" ){
+                            GET_ID_FROM_DB.set(connections[i].sequence, TEMP_DB_PROPERTIES); 
+                        }
+                        TEMP_DB_PROPERTIES = null;
                     } else {
                         toCheck = connections[i].sourceValue;
                     }
