@@ -30,6 +30,7 @@ import gr.aueb.users.ActionGetUsers;
 import gr.aueb.users.ActionSendTrustRequest;
 import gr.aueb.users.ActionUpdatePercentage;
 import it.unibas.spicy.persistence.DAOException;
+import it.unibas.spicy.utility.SpicyEngineConstants;
 import it.unibas.spicygui.commons.Modello;
 import java.io.IOException;
 import java.security.Principal;
@@ -198,9 +199,11 @@ public class MappingController {
     
     @RequestMapping(value="/EstablishedConnection", method=RequestMethod.POST, produces="text/plain")
     public String connectionInfo(@RequestParam(value="sourcePathArray[]",required=false) String[] sourcePathArray, @RequestParam("sourceValue") String sourceValueText,
-            @RequestParam("targetPath") String targetPath,@RequestParam("expression") String transformationText, @RequestParam("scenarioNo") String scenarioNo) {      
+            @RequestParam("targetPath") String targetPath,@RequestParam("expression") String transformationText, 
+            @RequestParam("scenarioNo") String scenarioNo, @RequestParam("type") String type, 
+            @RequestParam("sequence") String sequence, @RequestParam("offset") String offset) {
         ActionNewConnection newConnection = new ActionNewConnection(modello, scenarioNo);                    
-        newConnection.performAction(sourcePathArray, sourceValueText, targetPath ,transformationText); 
+        newConnection.performAction(sourcePathArray, sourceValueText, targetPath ,transformationText, type, sequence, offset); 
         JSONObject outputObject = new JSONObject();
         return outputObject.toJSONString();
     } 
@@ -212,7 +215,8 @@ public class MappingController {
         ActionDeleteConnection deleteConnection = new ActionDeleteConnection(modello, scenarioNo);
         deleteConnection.performAction(sourcePath, targetPath);
         ActionNewConnection newConnection = new ActionNewConnection(modello,scenarioNo); 
-        newConnection.performAction(sourcePathArray, sourceValueText, targetPath ,transformationText); 
+        //TODO - xarchakos
+        newConnection.performAction(sourcePathArray, sourceValueText, targetPath ,transformationText, null, null, null); 
         JSONObject outputObject = new JSONObject();
         return outputObject.toJSONString();
     } 

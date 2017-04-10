@@ -29,8 +29,11 @@ import it.unibas.spicy.persistence.DAOMappingTask;
 import gr.aueb.mipmapgui.Costanti;
 import it.unibas.spicygui.commons.Modello;
 import gr.aueb.mipmapgui.controller.Scenario;
+import it.unibas.spicy.model.correspondence.ValueCorrespondence;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.FileSystemException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import org.apache.commons.logging.Log;
@@ -52,7 +55,7 @@ public class ActionSaveMappingTask{
     public void performAction(String saveName, String user, boolean overwrite, String previousName, boolean fromGlobal, 
             boolean fromTrustedUser, String trustedUser, boolean saveGlobal, boolean savePublic) {
         Scenario scenario = (Scenario) modello.getBean(Costanti.CURRENT_SCENARIO);
-        MappingTask  mappingTask = scenario.getMappingTask();               
+        MappingTask  mappingTask = scenario.getMappingTask();        
         try {
             String initialPath;
             String mappingTaskFile;
@@ -81,7 +84,7 @@ public class ActionSaveMappingTask{
             //and copy the source and target folders' contents to it
             copyContents(saveName, user, initialPath, overwrite, saveGlobal, savePublic, file);                       
             mappingTask.setModified(false);           
-        } catch (DAOException | IOException ex) {
+        } catch (DAOException| IOException ex) {
             logger.error(ex);
         }
     }
@@ -110,7 +113,11 @@ public class ActionSaveMappingTask{
             File destFile = new File(destFolderPath + "mapping_task.xml");
             //move and rename mapping task xml file
             //FileUtils.moveFile(initFile, destFile);
-            Files.move(initFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            try{
+                Files.move(initFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            }catch (FileSystemException ex){
+                System.out.println(ex.getMessage());
+            }
             
         }
         else {
