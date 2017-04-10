@@ -211,12 +211,12 @@ public class MappingController {
     @RequestMapping(value="/UpdateConnection", method=RequestMethod.POST, produces="text/plain")
     public String updateConnectionInfo(@RequestParam("sourcePathArray[]") String[] sourcePathArray, @RequestParam("sourceValue") String sourceValueText,
             @RequestParam("sourcePath") String sourcePath, @RequestParam("targetPath") String targetPath,
-            @RequestParam("expression") String transformationText, @RequestParam("scenarioNo") String scenarioNo) {       
+            @RequestParam("expression") String transformationText, @RequestParam("scenarioNo") String scenarioNo,
+            @RequestParam("type") String type, @RequestParam("sequence") String sequence, @RequestParam("offset") String offset) {       
         ActionDeleteConnection deleteConnection = new ActionDeleteConnection(modello, scenarioNo);
         deleteConnection.performAction(sourcePath, targetPath);
         ActionNewConnection newConnection = new ActionNewConnection(modello,scenarioNo); 
-        //TODO - xarchakos
-        newConnection.performAction(sourcePathArray, sourceValueText, targetPath ,transformationText, null, null, null); 
+        newConnection.performAction(sourcePathArray, sourceValueText, targetPath ,transformationText, type, sequence, offset); 
         JSONObject outputObject = new JSONObject();
         return outputObject.toJSONString();
     } 

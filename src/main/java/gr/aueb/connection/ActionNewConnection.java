@@ -73,7 +73,6 @@ public class ActionNewConnection {
             }
             fromPath = sourceValueText;
         }
-        System.out.println(SpicyEngineConstants.OFFSET_MAPPING.get(sequence));
         PathExpression targetPathExpression = generatePathExpression(targetPath);
         Expression transformationFunctionExpression = null;
         if(transformationText != null&&!transformationText.equals("")){
