@@ -387,7 +387,7 @@ function removeTGDTabs(scenarioNo){
         var findString1 = 'gdTabs-';
         var findString2 = 'no';
         var tabScenarioNo = tabId.substring(tabId.indexOf(findString1)+findString1.length, tabId.indexOf(findString2));
-        if(tabScenarioNo==scenarioNo){
+        if(tabScenarioNo===scenarioNo){
             $('a[href$="'+tabId+'"]').parent().remove();
             $(this).remove();
        }
@@ -3768,7 +3768,7 @@ $(document).on('click','.removeButton',function() {
      if($('#sequence_value').val()!=="")
         createGetFromDbPanel();
      else
-         alert("Please set a sequence name!");
+        alert("Please set a sequence name!");
  });
  
  
