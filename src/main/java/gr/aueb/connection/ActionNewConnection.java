@@ -32,7 +32,8 @@ public class ActionNewConnection {
         this.scenarioNo=scenarioNo;
     }
     
-    public void performAction(String[] sourcePathArray, String sourceValueText, String targetPath, String transformationText) {
+    public void performAction(String[] sourcePathArray, String sourceValueText, String targetPath, String transformationText, 
+            String type, String sequence, String offset) {
         HashMap<Integer, Scenario> scenarioMap = (HashMap) modello.getBean(Costanti.SCENARIO_MAPPER);
         Scenario scenario = scenarioMap.get(Integer.valueOf(scenarioNo));
         MappingTask mappingTask = scenario.getMappingTask();
@@ -52,20 +53,27 @@ public class ActionNewConnection {
         if (sourceValueText!=null &&!sourceValueText.equals("")){
             if (sourceValueText.equalsIgnoreCase(SpicyEngineConstants.SOURCEVALUE_DATE_FUNCTION)) {
                 sourceValue = new DateFunction();
+                sourceValue.setType(type);
             } else if (sourceValueText.equalsIgnoreCase(SpicyEngineConstants.SOURCEVALUE_DATETIME_FUNCTION)) {
                 sourceValue = new DatetimeFunction();
+                sourceValue.setType(type);
             } 
             else if (sourceValueText.equalsIgnoreCase(SpicyEngineConstants.SOURCEVALUE_NEWID_FUNCTION)) {
-                System.out.println("ActionNewConnection: " + sourceValueText);
                 sourceValue = new NewIdFunction();
+                sourceValue.setType(type);
+                sourceValue.setSequence(sequence);
+                SpicyEngineConstants.OFFSET_MAPPING.put(sequence, offset);
+                if(type.equals("getId()")){
+                    //TODO - xarchakos fill GET_ID
+                }
             } 
             else {
                 sourceValue = new ConstantValue(sourceValueText);
+                sourceValue.setType(type);
             }
             fromPath = sourceValueText;
         }
         PathExpression targetPathExpression = generatePathExpression(targetPath);
-        
         Expression transformationFunctionExpression = null;
         if(transformationText != null&&!transformationText.equals("")){
             transformationFunctionExpression = new Expression(DAOXmlUtility.cleanXmlString(transformationText));
