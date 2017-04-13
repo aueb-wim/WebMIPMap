@@ -30,7 +30,6 @@ import gr.aueb.users.ActionGetUsers;
 import gr.aueb.users.ActionSendTrustRequest;
 import gr.aueb.users.ActionUpdatePercentage;
 import it.unibas.spicy.persistence.DAOException;
-import it.unibas.spicy.utility.SpicyEngineConstants;
 import it.unibas.spicygui.commons.Modello;
 import java.io.IOException;
 import java.security.Principal;
@@ -44,7 +43,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
+// ioannisxar
 @RestController
 public class MappingController {
         
@@ -201,9 +200,9 @@ public class MappingController {
     public String connectionInfo(@RequestParam(value="sourcePathArray[]",required=false) String[] sourcePathArray, @RequestParam("sourceValue") String sourceValueText,
             @RequestParam("targetPath") String targetPath,@RequestParam("expression") String transformationText, 
             @RequestParam("scenarioNo") String scenarioNo, @RequestParam("type") String type, 
-            @RequestParam("sequence") String sequence, @RequestParam("offset") String offset) {
+            @RequestParam("sequence") String sequence, @RequestParam("offset") String offset, @RequestParam("dbProperties") String dbProperties) {
         ActionNewConnection newConnection = new ActionNewConnection(modello, scenarioNo);                    
-        newConnection.performAction(sourcePathArray, sourceValueText, targetPath ,transformationText, type, sequence, offset); 
+        newConnection.performAction(sourcePathArray, sourceValueText, targetPath ,transformationText, type, sequence, offset, dbProperties); 
         JSONObject outputObject = new JSONObject();
         return outputObject.toJSONString();
     } 
@@ -212,11 +211,12 @@ public class MappingController {
     public String updateConnectionInfo(@RequestParam("sourcePathArray[]") String[] sourcePathArray, @RequestParam("sourceValue") String sourceValueText,
             @RequestParam("sourcePath") String sourcePath, @RequestParam("targetPath") String targetPath,
             @RequestParam("expression") String transformationText, @RequestParam("scenarioNo") String scenarioNo,
-            @RequestParam("type") String type, @RequestParam("sequence") String sequence, @RequestParam("offset") String offset) {       
+            @RequestParam("type") String type, @RequestParam("sequence") String sequence, @RequestParam("offset") String offset, 
+            @RequestParam("dbProperties") String dbProperties) {       
         ActionDeleteConnection deleteConnection = new ActionDeleteConnection(modello, scenarioNo);
         deleteConnection.performAction(sourcePath, targetPath);
         ActionNewConnection newConnection = new ActionNewConnection(modello,scenarioNo); 
-        newConnection.performAction(sourcePathArray, sourceValueText, targetPath ,transformationText, type, sequence, offset); 
+        newConnection.performAction(sourcePathArray, sourceValueText, targetPath ,transformationText, type, sequence, offset, dbProperties); 
         JSONObject outputObject = new JSONObject();
         return outputObject.toJSONString();
     } 

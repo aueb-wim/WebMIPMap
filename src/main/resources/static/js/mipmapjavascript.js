@@ -682,7 +682,8 @@ function createConstantOptionsPopup(item_id, newplumb, constants){
                                 GET_ID_FROM_DB.set(sequence_name, TEMP_DB_PROPERTIES);
                                 OFFSET_MAPPING.set(sequence_name, offset_value);
                                 TEMP_DB_PROPERTIES = null;
-                                updateConstantConnection(item_id, newplumb, result_string, sequence_name, offset_value, $("#"+item_id).data("type"));
+                                updateConstantConnection(item_id, newplumb, result_string, sequence_name, offset_value, $("#"+item_id).data("type"), 
+                                                        JSON.stringify(GET_ID_FROM_DB.get(sequence_name)));
                                 newplumb.repaintEverything();
                                 dialog.dialog("close");
                             }
@@ -695,7 +696,7 @@ function createConstantOptionsPopup(item_id, newplumb, constants){
                                 //set the type of the constant value that selected
                                 $("#"+item_id).data("type", "constant");
                                 OFFSET_MAPPING.set(sequence_name, offset_value);
-                                updateConstantConnection(item_id, newplumb, result_string, sequence_name, offset_value, $("#"+item_id).data("type"));
+                                updateConstantConnection(item_id, newplumb, result_string, sequence_name, offset_value, $("#"+item_id).data("type"), null);
                                 newplumb.repaintEverything();
                                 dialog.dialog("close");
                             }
@@ -712,7 +713,7 @@ function createConstantOptionsPopup(item_id, newplumb, constants){
                         } else if(result_string==="datetime()"){
                             $("#"+item_id).data("type", "datetime");
                         }
-                        updateConstantConnection(item_id, newplumb, result_string, null, null, $("#"+item_id).data("type"));
+                        updateConstantConnection(item_id, newplumb, result_string, null, null, $("#"+item_id).data("type"), null);
                         newplumb.repaintEverything();
                         dialog.dialog("close");
                     }                    
@@ -1870,12 +1871,13 @@ function makeTrees (sourceTreeArray, targetTreeArray, sourceId, targetId, newplu
             con.setParameter("sourcePathArray",sourcePathArray);
             var sequence = sourceValue.split("_")[1];
             var offset = OFFSET_MAPPING.get(sequence);
+            var dbProperties = "null";
             if (sequence === undefined) {
                 sequence = "null";
                 offset = "null";
-            } 
-            
-            //TODO - xarchakos pass GET_ID_FROM_DB
+            } else {
+                dbProperties = JSON.stringify(GET_ID_FROM_DB.get(sequence));
+            }
             //do not create new connections on server when loading a mapping task
             if(lastAction!=="open"){
                  $.ajax( {
@@ -1883,7 +1885,7 @@ function makeTrees (sourceTreeArray, targetTreeArray, sourceId, targetId, newplu
                     type: 'POST',
                     data: {'sourcePathArray[]':sourcePathArray, targetPath:targetPath, sourceValue: sourceValue.split("_")[0],
                         expression: expression.split("_")[0], scenarioNo: idNo, type: type, sequence: sequence,
-                        offset: offset},
+                        offset: offset, dbProperties: dbProperties},
                     beforeSend: function(xhr){
                             xhr.setRequestHeader("X-XSRF-TOKEN", csrftoken);
                     }
@@ -2112,9 +2114,8 @@ function setDuplicationNo(counter, original_text){
 }
 
 //function that checks if a connection from a constant exists and updates its value
-function updateConstantConnection(id, newplumb, newValue, sequence, offset, type){
+function updateConstantConnection(id, newplumb, newValue, sequence, offset, type, dbProperties){
     var existing_conns = newplumb.getConnections({ source: $('#'+id).find('.span_shown').attr('id') });
-    //TODO - xarchakos pass GET_ID_FROM_DB
     if(existing_conns.length  !== 0){
         for (var i=0; i< existing_conns.length; i++){
             $.ajax( {
@@ -2122,7 +2123,7 @@ function updateConstantConnection(id, newplumb, newValue, sequence, offset, type
                 type: 'POST',
                 data: {sourcePath : existing_conns[i].getParameter("sourcePath"), targetPath: existing_conns[i].getParameter("targetPath"), 
                        scenarioNo: existing_conns[i].getParameter("scenarioNo"), sourceValue:newValue, 'sourcePathArray[]': null, 
-                       expression:newValue, type: type, sequence: sequence, offset: offset},
+                       expression:newValue, type: type, sequence: sequence, offset: offset, dbProperties: dbProperties},
                 beforeSend: function(xhr){
                         xhr.setRequestHeader("X-XSRF-TOKEN", csrftoken);
                 }

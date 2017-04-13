@@ -98,9 +98,6 @@ public class ActionOpenMappingTask {
         }
         File file = new File(mappingTaskFile);
         scenario = openCompositionFile(file.getPath(), file);
-        
-        System.out.println("openMappingTask" + SpicyEngineConstants.OFFSET_MAPPING.get("apto"));
-        System.out.println("open2: \t" + SpicyEngineConstants.GET_ID_FROM_DB.get("apto").getPassword());
         JSONTreeCreator treeCreator = new JSONTreeCreator(modello);
         this.treeObject = treeCreator.createSchemaTrees();
     }
