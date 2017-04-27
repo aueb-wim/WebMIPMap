@@ -525,7 +525,14 @@ function createConstantOptionsPopup(item_id, newplumb, constants){
     var constant_value = "";
     var newIdChecked, stringChecked = "", numberChecked = "";
     var offset_type, offset;
-    var selected_sequence = connection_text.split("_")[1];
+    //var selected_sequence = connection_text.split("_")[1];
+    var sequence_array = connection_text.split("_");
+    var selected_sequence = "";
+    for(i in sequence_array){
+        if(parseInt(i)!==0)
+            selected_sequence += sequence_array[i] + "_";
+    }
+    selected_sequence = selected_sequence.slice(0,-1);
     //found which constant widget is selected and set the appropriate settings in the UI panel
     if(connection_text.split("_")[0] === "newId()" ){
         //find the existing database properties for getId type of offset
@@ -606,7 +613,7 @@ function createConstantOptionsPopup(item_id, newplumb, constants){
         $('#func_selection').prop('disabled', false);
         $("#func_selection").val("newId()").change();
         $('#offset_panel').css('display','block');
-        $('#sequence_value').val(connection_text.split("_")[1]);
+        $('#sequence_value').val(selected_sequence);
         if(offset_type === "constant"){
             $('#offset_value').val(offset);
         } else if(offset_type === "getId()"){
@@ -675,16 +682,7 @@ function createConstantOptionsPopup(item_id, newplumb, constants){
                                 alert("Please setup the database configuration!");
                             } else {
                                 //TODO - get value from database ( call to DB )
-                                var offset_value = $("#offset_value").val();
-                                //set the type of the constant value that selected
-                                $("#"+item_id).data("type", "getId()");
-                                //update global entries if an offset from db is valid
-                                GET_ID_FROM_DB.set(sequence_name, TEMP_DB_PROPERTIES);
-                                OFFSET_MAPPING.set(sequence_name, offset_value);
-                                TEMP_DB_PROPERTIES = null;
-                                updateConstantConnection(item_id, newplumb, result_string, sequence_name, offset_value, $("#"+item_id).data("type"));
-                                newplumb.repaintEverything();
-                                dialog.dialog("close");
+                                getDbOffset(item_id, newplumb, result_string, sequence_name, dialog);
                             }
                         } else if(sequence_input_type === "constant"){
                             //the offset must be numeric
@@ -695,7 +693,7 @@ function createConstantOptionsPopup(item_id, newplumb, constants){
                                 //set the type of the constant value that selected
                                 $("#"+item_id).data("type", "constant");
                                 OFFSET_MAPPING.set(sequence_name, offset_value);
-                                updateConstantConnection(item_id, newplumb, result_string, sequence_name, offset_value, $("#"+item_id).data("type"));
+                                updateConstantConnection(item_id, newplumb, result_string, sequence_name, offset_value, $("#"+item_id).data("type"), null);
                                 newplumb.repaintEverything();
                                 dialog.dialog("close");
                             }
@@ -712,7 +710,7 @@ function createConstantOptionsPopup(item_id, newplumb, constants){
                         } else if(result_string==="datetime()"){
                             $("#"+item_id).data("type", "datetime");
                         }
-                        updateConstantConnection(item_id, newplumb, result_string, null, null, $("#"+item_id).data("type"));
+                        updateConstantConnection(item_id, newplumb, result_string, null, null, $("#"+item_id).data("type"), null);
                         newplumb.repaintEverything();
                         dialog.dialog("close");
                     }                    
@@ -731,6 +729,37 @@ function createConstantOptionsPopup(item_id, newplumb, constants){
           }
           ,close: function(event, ui) { $(this).remove(); }
         });  
+}
+
+function getDbOffset(item_id, newplumb, result_string, sequence_name, dialog){
+    $.ajax( {
+        url: 'GetDBOffset',
+        type: 'POST',
+        data: {dbProperties: JSON.stringify(TEMP_DB_PROPERTIES)},
+        beforeSend: function(xhr){
+                xhr.setRequestHeader("X-XSRF-TOKEN", csrftoken);
+        }
+      } ).done(function(responseText) {
+        var obj = $.parseJSON(responseText);
+        if(obj.hasOwnProperty("exception")){
+            alert(obj.exception);
+            TEMP_DB_PROPERTIES = null;
+            newplumb.repaintEverything();
+            dialog.dialog("close");
+        } else {
+            var offset_value = obj;
+            //set the type of the constant value that selected
+            $("#"+item_id).data("type", "getId()");
+            //update global entries if an offset from db is valid
+            GET_ID_FROM_DB.set(sequence_name, TEMP_DB_PROPERTIES);
+            OFFSET_MAPPING.set(sequence_name, offset_value);
+            TEMP_DB_PROPERTIES = null;
+            updateConstantConnection(item_id, newplumb, result_string, sequence_name, offset_value, $("#"+item_id).data("type"), 
+                                    JSON.stringify(GET_ID_FROM_DB.get(sequence_name)));
+            newplumb.repaintEverything();
+            dialog.dialog("close");
+        }
+      });
 }
 
 //on doubleclicking on the function menu, open options menu for the function
@@ -1868,14 +1897,22 @@ function makeTrees (sourceTreeArray, targetTreeArray, sourceId, targetId, newplu
             con.setParameter("targetPath",targetPath);
             con.setParameter("scenarioNo",idNo);
             con.setParameter("sourcePathArray",sourcePathArray);
-            var sequence = sourceValue.split("_")[1];
+            //var sequence = sourceValue.split("_")[1];
+            var sequence_array = sourceValue.split("_");
+            var sequence = "";
+            for(i in sequence_array){
+                if(parseInt(i)!==0)
+                    sequence += sequence_array[i] + "_";
+            }
+            sequence = sequence.slice(0,-1);
             var offset = OFFSET_MAPPING.get(sequence);
+            var dbProperties = "null";
             if (sequence === undefined) {
                 sequence = "null";
                 offset = "null";
-            } 
-            
-            //TODO - xarchakos pass GET_ID_FROM_DB
+            } else {
+                dbProperties = JSON.stringify(GET_ID_FROM_DB.get(sequence));
+            }
             //do not create new connections on server when loading a mapping task
             if(lastAction!=="open"){
                  $.ajax( {
@@ -1883,7 +1920,7 @@ function makeTrees (sourceTreeArray, targetTreeArray, sourceId, targetId, newplu
                     type: 'POST',
                     data: {'sourcePathArray[]':sourcePathArray, targetPath:targetPath, sourceValue: sourceValue.split("_")[0],
                         expression: expression.split("_")[0], scenarioNo: idNo, type: type, sequence: sequence,
-                        offset: offset},
+                        offset: offset, dbProperties: dbProperties},
                     beforeSend: function(xhr){
                             xhr.setRequestHeader("X-XSRF-TOKEN", csrftoken);
                     }
@@ -2112,9 +2149,8 @@ function setDuplicationNo(counter, original_text){
 }
 
 //function that checks if a connection from a constant exists and updates its value
-function updateConstantConnection(id, newplumb, newValue, sequence, offset, type){
+function updateConstantConnection(id, newplumb, newValue, sequence, offset, type, dbProperties){
     var existing_conns = newplumb.getConnections({ source: $('#'+id).find('.span_shown').attr('id') });
-    //TODO - xarchakos pass GET_ID_FROM_DB
     if(existing_conns.length  !== 0){
         for (var i=0; i< existing_conns.length; i++){
             $.ajax( {
@@ -2122,7 +2158,7 @@ function updateConstantConnection(id, newplumb, newValue, sequence, offset, type
                 type: 'POST',
                 data: {sourcePath : existing_conns[i].getParameter("sourcePath"), targetPath: existing_conns[i].getParameter("targetPath"), 
                        scenarioNo: existing_conns[i].getParameter("scenarioNo"), sourceValue:newValue, 'sourcePathArray[]': null, 
-                       expression:newValue, type: type, sequence: sequence, offset: offset},
+                       expression:newValue, type: type, sequence: sequence, offset: offset, dbProperties: dbProperties},
                 beforeSend: function(xhr){
                         xhr.setRequestHeader("X-XSRF-TOKEN", csrftoken);
                 }

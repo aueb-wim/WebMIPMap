@@ -9,6 +9,7 @@ import gr.aueb.mipmapgui.Costanti;
 import gr.aueb.mipmapgui.controller.Scenario;
 import gr.aueb.mipmapgui.controller.file.ActionLoadTrustedUserMappings;
 import gr.aueb.mipmapgui.controller.file.ActionDeleteMappingTask;
+import gr.aueb.mipmapgui.controller.file.ActionGetDbOffset;
 import gr.aueb.mipmapgui.controller.file.ActionInitialize;
 import gr.aueb.mipmapgui.controller.file.ActionNewMappingTask;
 import gr.aueb.mipmapgui.controller.file.ActionOpenMappingTask;
@@ -30,10 +31,10 @@ import gr.aueb.users.ActionGetUsers;
 import gr.aueb.users.ActionSendTrustRequest;
 import gr.aueb.users.ActionUpdatePercentage;
 import it.unibas.spicy.persistence.DAOException;
-import it.unibas.spicy.utility.SpicyEngineConstants;
 import it.unibas.spicygui.commons.Modello;
 import java.io.IOException;
 import java.security.Principal;
+import java.sql.SQLException;
 import java.util.HashMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -44,7 +45,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
+// ioannisxar
 @RestController
 public class MappingController {
         
@@ -201,9 +202,9 @@ public class MappingController {
     public String connectionInfo(@RequestParam(value="sourcePathArray[]",required=false) String[] sourcePathArray, @RequestParam("sourceValue") String sourceValueText,
             @RequestParam("targetPath") String targetPath,@RequestParam("expression") String transformationText, 
             @RequestParam("scenarioNo") String scenarioNo, @RequestParam("type") String type, 
-            @RequestParam("sequence") String sequence, @RequestParam("offset") String offset) {
+            @RequestParam("sequence") String sequence, @RequestParam("offset") String offset, @RequestParam(value="dbProperties", required=false) String dbProperties) {
         ActionNewConnection newConnection = new ActionNewConnection(modello, scenarioNo);                    
-        newConnection.performAction(sourcePathArray, sourceValueText, targetPath ,transformationText, type, sequence, offset); 
+        newConnection.performAction(sourcePathArray, sourceValueText, targetPath ,transformationText, type, sequence, offset, dbProperties); 
         JSONObject outputObject = new JSONObject();
         return outputObject.toJSONString();
     } 
@@ -212,11 +213,12 @@ public class MappingController {
     public String updateConnectionInfo(@RequestParam("sourcePathArray[]") String[] sourcePathArray, @RequestParam("sourceValue") String sourceValueText,
             @RequestParam("sourcePath") String sourcePath, @RequestParam("targetPath") String targetPath,
             @RequestParam("expression") String transformationText, @RequestParam("scenarioNo") String scenarioNo,
-            @RequestParam("type") String type, @RequestParam("sequence") String sequence, @RequestParam("offset") String offset) {       
+            @RequestParam("type") String type, @RequestParam("sequence") String sequence, @RequestParam("offset") String offset, 
+            @RequestParam(value="dbProperties", required=false) String dbProperties) {       
         ActionDeleteConnection deleteConnection = new ActionDeleteConnection(modello, scenarioNo);
         deleteConnection.performAction(sourcePath, targetPath);
         ActionNewConnection newConnection = new ActionNewConnection(modello,scenarioNo); 
-        newConnection.performAction(sourcePathArray, sourceValueText, targetPath ,transformationText, type, sequence, offset); 
+        newConnection.performAction(sourcePathArray, sourceValueText, targetPath ,transformationText, type, sequence, offset, dbProperties); 
         JSONObject outputObject = new JSONObject();
         return outputObject.toJSONString();
     } 
@@ -383,7 +385,14 @@ public class MappingController {
         outputObject.put("exception","Server exception: "+ex.getMessage());
         return outputObject.toJSONString();
     }
-                       
+          
+    @RequestMapping(value="/GetDBOffset", method=RequestMethod.POST, produces="text/plain")
+    public String getDBOffset(@RequestParam("dbProperties") String dbProperties) throws SQLException, DAOException {       
+        ActionGetDbOffset gdo = new ActionGetDbOffset(dbProperties);
+        String offset = gdo.performAction();
+        return offset;
+    } 
+    
     private void initialize(){
        if (this.modello == null) {
            modello = new Modello();

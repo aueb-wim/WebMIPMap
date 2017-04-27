@@ -1,6 +1,6 @@
 package gr.aueb.connection;
 
-//giannisk
+//giannisk, ioannisxar
 
 import it.unibas.spicy.model.correspondence.ConstantValue;
 import it.unibas.spicy.model.correspondence.DateFunction;
@@ -17,10 +17,13 @@ import it.unibas.spicy.utility.SpicyEngineConstants;
 import gr.aueb.mipmapgui.Costanti;
 import it.unibas.spicygui.commons.Modello;
 import gr.aueb.mipmapgui.controller.Scenario;
+import it.unibas.spicy.model.correspondence.GetIdFromDb;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import javax.servlet.http.HttpServletRequest;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 public class ActionNewConnection {
     private Modello modello;
@@ -33,7 +36,7 @@ public class ActionNewConnection {
     }
     
     public void performAction(String[] sourcePathArray, String sourceValueText, String targetPath, String transformationText, 
-            String type, String sequence, String offset) {
+            String type, String sequence, String offset, String dbProperties) {
         HashMap<Integer, Scenario> scenarioMap = (HashMap) modello.getBean(Costanti.SCENARIO_MAPPER);
         Scenario scenario = scenarioMap.get(Integer.valueOf(scenarioNo));
         MappingTask mappingTask = scenario.getMappingTask();
@@ -64,9 +67,24 @@ public class ActionNewConnection {
                 sourceValue.setSequence(sequence);
                 SpicyEngineConstants.OFFSET_MAPPING.put(sequence, offset);
                 if(type.equals("getId()")){
-                    //TODO - xarchakos fill GET_ID
+                    JSONParser parser = new JSONParser();
+                    try {
+                        JSONObject jsonObject = (JSONObject) parser.parse(dbProperties);
+                        String driver = (String) jsonObject.get("driver");
+                        String uri = (String) jsonObject.get("uri");
+                        String schema = (String) jsonObject.get("schema");
+                        String username = (String) jsonObject.get("username");
+                        String password = (String) jsonObject.get("password");
+                        String table = (String) jsonObject.get("table");
+                        String column = (String) jsonObject.get("column");
+                        String function_value = (String) jsonObject.get("function_value");
+                        SpicyEngineConstants.GET_ID_FROM_DB.put(sequence, 
+                                new GetIdFromDb(driver, uri, schema, username, password, table, column, function_value));
+                    }catch(ParseException e){
+                        System.err.println(e.getMessage());
+                    }
                 }
-            } 
+            }
             else {
                 sourceValue = new ConstantValue(sourceValueText);
                 sourceValue.setType(type);
