@@ -683,6 +683,7 @@ function createConstantOptionsPopup(item_id, newplumb, constants){
                             } else {
                                 //TODO - get value from database ( call to DB )
                                 getDbOffset(item_id, newplumb, result_string, sequence_name, dialog);
+
                             }
                         } else if(sequence_input_type === "constant"){
                             //the offset must be numeric
