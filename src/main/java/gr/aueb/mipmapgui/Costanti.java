@@ -26,8 +26,8 @@ import java.awt.Color;
 public class Costanti {
 
     //********************* SERVER FOLDERS/PATHS ***************************
-    public static final String SERVER_MAIN_FOLDER = System.getenv("MIPMAP_HOME").replace("", "");
-    //public static final String SERVER_MAIN_FOLDER = "/home/ioannisxar/Dropbox/aueb-wim-master/mipmap/WebMIPMap";
+    //public static final String SERVER_MAIN_FOLDER = System.getenv("MIPMAP_HOME").replace("", "");
+    public static final String SERVER_MAIN_FOLDER = "/home/ioannisxar/Dropbox/aueb-wim-master/mipmap/WebMIPMap";
     public static final String SERVER_FILES_FOLDER = "/uploaded_files/";
     public static final String SERVER_SCHEMATA_FOLDER = "/schemata/";
     public static final String SERVER_GLOBAL_TASKS_PATH = "/global/admin_users/global_to_all/";

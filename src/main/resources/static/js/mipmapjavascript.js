@@ -3773,7 +3773,30 @@ $(document).ready(function(){
                 }
             });
     });
-     
+    
+    $( "#recommendMapping" ).click(function() {
+        try {
+            var mappingName = scenarioMap[currentScenario][0];
+            $.ajax( {
+                url: 'RecommendMappingTask',
+                type: 'GET',
+                data: {openedMappingName: mappingName},
+                beforeSend: function(xhr){
+                        xhr.setRequestHeader("X-XSRF-TOKEN", csrftoken);
+                }
+              } ).done(function(responseText) {
+                //alert(scenarioMap[currentScenario][0]);
+                alert(responseText);
+            });
+        } catch (e) {
+            if (e instanceof TypeError) {
+              alert("Please select a mapping scenario!");
+            }
+        }
+    
+        
+    });
+    
     //Main menu options
     $("#jMenu").jMenu({
       ulWidth : 'auto',

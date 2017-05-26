@@ -30,6 +30,7 @@ import gr.aueb.users.ActionAnswerTrustRequest;
 import gr.aueb.users.ActionGetUsers;
 import gr.aueb.users.ActionSendTrustRequest;
 import gr.aueb.users.ActionUpdatePercentage;
+import gr.aueb.users.recommendation.ActionFindCommonMappingTasks;
 import it.unibas.spicy.persistence.DAOException;
 import it.unibas.spicygui.commons.Modello;
 import java.io.IOException;
@@ -392,6 +393,13 @@ public class MappingController {
         String offset = gdo.performAction();
         return offset;
     } 
+    
+    @RequestMapping(value="/RecommendMappingTask", method=RequestMethod.GET, produces="text/plain")
+    public String RecommendMappingTask(@RequestParam("openedMappingName") String openedMappingName) {  
+        ActionFindCommonMappingTasks commonMappings = new ActionFindCommonMappingTasks(user, openedMappingName);
+        commonMappings.findCommonScenarions();
+        return openedMappingName;
+    }
     
     private void initialize(){
        if (this.modello == null) {
