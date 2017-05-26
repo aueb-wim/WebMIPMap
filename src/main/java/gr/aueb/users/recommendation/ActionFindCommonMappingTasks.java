@@ -5,19 +5,13 @@
  */
 package gr.aueb.users.recommendation;
 
-import static gr.aueb.controllers.MappingController.user;
 import gr.aueb.users.ActionGetUsers;
-import gr.aueb.users.recommendation.mappingmodel.Field;
 import gr.aueb.users.recommendation.mappingmodel.MappingScenario;
 import gr.aueb.users.recommendation.mappingmodel.Schema;
-import gr.aueb.users.recommendation.mappingmodel.Table;
 import it.unibas.spicy.persistence.DAOException;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 

@@ -56,4 +56,29 @@ public class Schema {
         }
     }
     
+    
+    public boolean compareSchemata(MappingScenario scenario, String schemaType){
+        boolean matched = true;
+        Schema schema = null;
+        if(schemaType.equals("source")){
+            schema = scenario.getSource();
+        } else if(schemaType.equals("target")) {
+            schema = scenario.getTarget();
+        }
+        
+        if(!databaseName.equals(schema.databaseName)){
+            return false;
+        }
+        for(Table t: tables){
+            HashMap<String, ArrayList<Field>> table = t.getTableName();
+            for (Map.Entry<String, ArrayList<Field>> entry : table.entrySet()) {
+                System.out.println("Table Name: " + entry.getKey());
+                for(Field f : entry.getValue()){
+                    System.out.println("\tAttribute Name/Type: " + f.getFieldName() + " / " + f.getFieldType());
+                }
+            }
+        }
+        return matched;
+    }
+    
 }
