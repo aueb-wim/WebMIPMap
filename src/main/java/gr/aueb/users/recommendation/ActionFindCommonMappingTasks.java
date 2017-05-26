@@ -5,6 +5,8 @@
  */
 package gr.aueb.users.recommendation;
 
+import static gr.aueb.controllers.MappingController.user;
+import gr.aueb.users.ActionGetUsers;
 import gr.aueb.users.recommendation.mappingmodel.Field;
 import gr.aueb.users.recommendation.mappingmodel.Schema;
 import gr.aueb.users.recommendation.mappingmodel.Table;
@@ -13,6 +15,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import org.json.simple.JSONObject;
 
 /**
  *
@@ -29,8 +32,13 @@ public class ActionFindCommonMappingTasks {
     
     public void findCommonScenarions() throws DAOException, IOException{
         OpenMappingScenario scenarioToMatch = new OpenMappingScenario(user, mappingName);
-        Schema sourceSchema = scenarioToMatch.getScenarioSchema("source");
-        Schema targetSchema = scenarioToMatch.getScenarioSchema("target");
+        Schema sourceSchema = scenarioToMatch.getScenarioSchema("source", "private");
+        Schema targetSchema = scenarioToMatch.getScenarioSchema("target", "private");
+        
+        ActionGetUsers actionGetUsers = new ActionGetUsers();
+        actionGetUsers.performAction(user);
+        JSONObject outputObject = actionGetUsers.getJSONObject();
+        System.out.println(outputObject.toJSONString());
     }
     
     private void printSchema(Schema schema){

@@ -37,9 +37,14 @@ public class OpenMappingScenario {
         this.scenarioName = scenarioName;
     }
     
-    public Schema getScenarioSchema(String inputType) throws DAOException, FileNotFoundException, IOException{
+    public Schema getScenarioSchema(String inputType, String mode) throws DAOException, FileNotFoundException, IOException{
         String mappingTaskFile;
-        String basePath = MipmapDirectories.getUserPrivatePath(user) + scenarioName;
+        String basePath = "";
+        if(mode.equals("private")){
+            basePath  = MipmapDirectories.getUserPrivatePath(user) + scenarioName;
+        } else if(mode.equals("public")){
+            basePath  = MipmapDirectories.getUserPublicPath(user) + scenarioName;
+        }
         mappingTaskFile = basePath +"/mapping_task.xml";
         Document document = daoUtility.buildDOM(mappingTaskFile);
         Element sourceElement = document.getRootElement().getChild(inputType);
