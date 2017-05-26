@@ -3785,7 +3785,6 @@ $(document).ready(function(){
                         xhr.setRequestHeader("X-XSRF-TOKEN", csrftoken);
                 }
               } ).done(function(responseText) {
-                alert(scenarioMap[currentScenario][0]);
                 alert(responseText);
             });
         } catch (e) {

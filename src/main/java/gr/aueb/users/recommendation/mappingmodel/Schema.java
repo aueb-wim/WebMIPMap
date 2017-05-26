@@ -6,6 +6,8 @@
 package gr.aueb.users.recommendation.mappingmodel;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  *
@@ -39,6 +41,19 @@ public class Schema {
     
     public ArrayList<Table> getDatabaseTables(){
         return tables;
+    }
+    
+    public void printSchema(){
+        System.out.println("Database Name: " + databaseName);
+        for(Table t: tables){
+            HashMap<String, ArrayList<Field>> table = t.getTableName();
+            for (Map.Entry<String, ArrayList<Field>> entry : table.entrySet()) {
+                System.out.println("Table Name: " + entry.getKey());
+                for(Field f : entry.getValue()){
+                    System.out.println("\tAttribute Name/Type: " + f.getFieldName() + " / " + f.getFieldType());
+                }
+            }
+        }
     }
     
 }

@@ -8,13 +8,17 @@ package gr.aueb.users.recommendation;
 import static gr.aueb.controllers.MappingController.user;
 import gr.aueb.users.ActionGetUsers;
 import gr.aueb.users.recommendation.mappingmodel.Field;
+import gr.aueb.users.recommendation.mappingmodel.MappingScenario;
 import gr.aueb.users.recommendation.mappingmodel.Schema;
 import gr.aueb.users.recommendation.mappingmodel.Table;
 import it.unibas.spicy.persistence.DAOException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 /**
@@ -32,26 +36,38 @@ public class ActionFindCommonMappingTasks {
     
     public void findCommonScenarions() throws DAOException, IOException{
         OpenMappingScenario scenarioToMatch = new OpenMappingScenario(user, mappingName);
-        Schema sourceSchema = scenarioToMatch.getScenarioSchema("source", "private");
-        Schema targetSchema = scenarioToMatch.getScenarioSchema("target", "private");
-        
+        Schema sourceSchemaToCheck = scenarioToMatch.getScenarioSchema("source", "private");
+        Schema targetSchemaToCheck = scenarioToMatch.getScenarioSchema("target", "private");
+        ArrayList<MappingScenario> trustedUserPublicMappings = trustedMappingsToCheck();
+        for(MappingScenario scenario: trustedUserPublicMappings){
+            System.out.println(scenario.getUserName());
+            System.out.println(scenario.getMappingTaskName());
+            scenario.getSource().printSchema();
+            scenario.getTarget().printSchema();
+        }
+    }
+    
+    private ArrayList<MappingScenario> trustedMappingsToCheck() throws DAOException, IOException{
+        ArrayList<MappingScenario> trustedUserPublicMappings = new ArrayList<>();
         ActionGetUsers actionGetUsers = new ActionGetUsers();
         actionGetUsers.performAction(user);
         JSONObject outputObject = actionGetUsers.getJSONObject();
-        System.out.println(outputObject.toJSONString());
-    }
-    
-    private void printSchema(Schema schema){
-        System.out.println("Database Name: " + schema.getDatabaseName());
-        for(Table t: schema.getDatabaseTables()){
-            HashMap<String, ArrayList<Field>> table = t.getTableName();
-            for (Map.Entry<String, ArrayList<Field>> entry : table.entrySet()) {
-                System.out.println("Table Name: " + entry.getKey());
-                for(Field f : entry.getValue()){
-                    System.out.println("Attribute Name: " + f.getFieldName());
-                    System.out.println("Attribute Type: " + f.getFieldType());
-                }
+        JSONArray trustedUsers = (JSONArray) outputObject.get("trustUsers");
+        Iterator<JSONObject> iterator = trustedUsers.iterator();
+        while (iterator.hasNext()) {
+            JSONObject innerObject = iterator.next();
+            JSONArray publicTasks = (JSONArray) innerObject.get("publicTasks");
+            Iterator<JSONObject> publicTasksIterator = publicTasks.iterator();
+            while (publicTasksIterator.hasNext()) {
+                String userName = (String) innerObject.get("userName");
+                String mappingTaskName = (String) publicTasksIterator.next().get("taskName");
+                OpenMappingScenario scenario = new OpenMappingScenario(userName, mappingTaskName);
+                Schema sourceSchema = scenario.getScenarioSchema("source", "public");
+                Schema targetSchema = scenario.getScenarioSchema("target", "public");
+                trustedUserPublicMappings.add(new MappingScenario(userName, mappingTaskName, sourceSchema, targetSchema));
             }
         }
+        return trustedUserPublicMappings;
     }
+    
 }
