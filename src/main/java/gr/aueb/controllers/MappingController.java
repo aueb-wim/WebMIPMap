@@ -395,7 +395,7 @@ public class MappingController {
     } 
     
     @RequestMapping(value="/RecommendMappingTask", method=RequestMethod.GET, produces="text/plain")
-    public String RecommendMappingTask(@RequestParam("openedMappingName") String openedMappingName) {  
+    public String RecommendMappingTask(@RequestParam("openedMappingName") String openedMappingName) throws DAOException, IOException {  
         ActionFindCommonMappingTasks commonMappings = new ActionFindCommonMappingTasks(user, openedMappingName);
         commonMappings.findCommonScenarions();
         return openedMappingName;

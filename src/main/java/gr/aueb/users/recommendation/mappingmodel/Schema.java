@@ -6,8 +6,6 @@
 package gr.aueb.users.recommendation.mappingmodel;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  *
@@ -15,18 +13,32 @@ import java.util.Map;
  */
 public class Schema {
     
-    private Map<String, ArrayList<Field>> schema;
+    private ArrayList<Table> tables;
+    private String databaseName;
     
-    public Schema(){
-        this.schema = new HashMap<>();
+    public Schema(String databaseName, ArrayList<Table> tables){
+        this.databaseName = databaseName;
+        this.tables = tables;
+    }
+
+    public Schema() {
+        tables = new ArrayList<>();
     }
     
-    public Schema(String tableName, ArrayList<Field> fields){
-        this.schema = new HashMap<>();
-        schema.put(tableName, fields);
+    public void addDatabaseName(String databaseName){
+        this.databaseName = databaseName;
     }
     
-    public void addTable(String tableName, ArrayList<Field> fields){
-        schema.put(tableName, fields);
+    public void addTables(ArrayList<Table> tables){
+        this.tables = tables;
     }
+    
+    public String getDatabaseName(){
+        return databaseName;
+    }
+    
+    public ArrayList<Table> getDatabaseTables(){
+        return tables;
+    }
+    
 }

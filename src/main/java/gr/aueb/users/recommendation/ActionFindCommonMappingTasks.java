@@ -5,6 +5,15 @@
  */
 package gr.aueb.users.recommendation;
 
+import gr.aueb.users.recommendation.mappingmodel.Field;
+import gr.aueb.users.recommendation.mappingmodel.Schema;
+import gr.aueb.users.recommendation.mappingmodel.Table;
+import it.unibas.spicy.persistence.DAOException;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  *
  * @author ioannisxar
@@ -18,8 +27,23 @@ public class ActionFindCommonMappingTasks {
         this.mappingName = mappingName;
     }
     
-    public void findCommonScenarions(){
-        System.out.println(user);
-        System.out.println(mappingName);
+    public void findCommonScenarions() throws DAOException, IOException{
+        OpenMappingScenario scenarioToMatch = new OpenMappingScenario(user, mappingName);
+        Schema sourceSchema = scenarioToMatch.getScenarioSchema("source");
+        Schema targetSchema = scenarioToMatch.getScenarioSchema("target");
+    }
+    
+    private void printSchema(Schema schema){
+        System.out.println("Database Name: " + schema.getDatabaseName());
+        for(Table t: schema.getDatabaseTables()){
+            HashMap<String, ArrayList<Field>> table = t.getTableName();
+            for (Map.Entry<String, ArrayList<Field>> entry : table.entrySet()) {
+                System.out.println("Table Name: " + entry.getKey());
+                for(Field f : entry.getValue()){
+                    System.out.println("Attribute Name: " + f.getFieldName());
+                    System.out.println("Attribute Type: " + f.getFieldType());
+                }
+            }
+        }
     }
 }
