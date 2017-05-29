@@ -1928,7 +1928,6 @@ function makeTrees (sourceTreeArray, targetTreeArray, sourceId, targetId, newplu
             con.setParameter("sourcePathArray",sourcePathArray);
             //do not create new connections on server when loading a mapping task
             if(lastAction!=="open"){
-                 alert(expression + " --- " + targetPath);
                  $.ajax( {
                     url: 'EstablishedConnection',
                     type: 'POST',
