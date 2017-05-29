@@ -1875,7 +1875,7 @@ function makeTrees (sourceTreeArray, targetTreeArray, sourceId, targetId, newplu
             }
             //function
             else if(con.getParameter("fromFunction")){
-                isSimple = false;
+                isSimple = true;
                 var relatedConnections = newplumb.getConnections({target: $('#'+con.sourceId).siblings('img').attr('id')});
                 for(var c=0; c<relatedConnections.length; c++) {
                     idSourceConnection = $('#'+relatedConnections[c].sourceId).closest('.myJsTree').attr('id');
@@ -1899,34 +1899,36 @@ function makeTrees (sourceTreeArray, targetTreeArray, sourceId, targetId, newplu
                 sourceValue = expression;
             }
             var source = "";
+            var sequence = "null";
+            var offset = "null";
+            var dbProperties = "null";
             if(isSimple){
                 con.setParameter("sourcePath",expression);
                 source = expression;
             } else {
                 con.setParameter("sourcePath",expression.split("_")[0]);
                 source = expression.split("_")[0];
+                var sequence_array = sourceValue.split("_");
+                var sequence = "";
+                for(i in sequence_array){
+                    if(parseInt(i)!==0)
+                        sequence += sequence_array[i] + "_";
+                }
+                sequence = sequence.slice(0,-1);
+                offset = OFFSET_MAPPING.get(sequence);
+                if (sequence === undefined) {
+                    sequence = "null";
+                    offset = "null";
+                } else {
+                    dbProperties = JSON.stringify(GET_ID_FROM_DB.get(sequence));
+                }
             }
             con.setParameter("targetPath",targetPath);
             con.setParameter("scenarioNo",idNo);
             con.setParameter("sourcePathArray",sourcePathArray);
-            //var sequence = sourceValue.split("_")[1];
-            var sequence_array = sourceValue.split("_");
-            var sequence = "";
-            for(i in sequence_array){
-                if(parseInt(i)!==0)
-                    sequence += sequence_array[i] + "_";
-            }
-            sequence = sequence.slice(0,-1);
-            var offset = OFFSET_MAPPING.get(sequence);
-            var dbProperties = "null";
-            if (sequence === undefined) {
-                sequence = "null";
-                offset = "null";
-            } else {
-                dbProperties = JSON.stringify(GET_ID_FROM_DB.get(sequence));
-            }
             //do not create new connections on server when loading a mapping task
             if(lastAction!=="open"){
+                 alert(expression + " --- " + targetPath);
                  $.ajax( {
                     url: 'EstablishedConnection',
                     type: 'POST',
