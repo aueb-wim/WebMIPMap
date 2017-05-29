@@ -5,6 +5,8 @@
  */
 package gr.aueb.users.recommendation.mappingmodel;
 
+import java.util.Objects;
+
 /**
  *
  * @author ioannisxar
@@ -34,5 +36,21 @@ public class Field {
     
     public String getFieldType(){
         return fieldType;
+    }
+    
+    @Override
+    public boolean equals(Object o){
+        if(o instanceof Field){
+            return fieldName.equals(((Field) o).fieldName) && fieldType.equals(((Field) o).fieldType);
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 67 * hash + Objects.hashCode(this.fieldName);
+        hash = 67 * hash + Objects.hashCode(this.fieldType);
+        return hash;
     }
 }

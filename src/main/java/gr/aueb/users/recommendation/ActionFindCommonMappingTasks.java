@@ -11,6 +11,7 @@ import gr.aueb.users.recommendation.mappingmodel.Schema;
 import it.unibas.spicy.persistence.DAOException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -28,17 +29,19 @@ public class ActionFindCommonMappingTasks {
         this.mappingName = mappingName;
     }
     
-    public void findCommonScenarions() throws DAOException, IOException{
+    public HashMap<String, String> findCommonScenarions() throws DAOException, IOException{
         OpenMappingScenario scenarioToMatch = new OpenMappingScenario(user, mappingName);
         Schema sourceSchemaToCheck = scenarioToMatch.getScenarioSchema("source", "private");
         Schema targetSchemaToCheck = scenarioToMatch.getScenarioSchema("target", "private");
         ArrayList<MappingScenario> trustedUserPublicMappings = trustedMappingsToCheck();
+        HashMap<String, String> commonScenarios = new HashMap<>();
         for(MappingScenario scenario: trustedUserPublicMappings){
-            System.out.println(scenario.getUserName());
-            System.out.println(scenario.getMappingTaskName());
-            scenario.getSource().printSchema();
-            scenario.getTarget().printSchema();
+            //checks if both source and target schemata are common in both scenarios
+            if(sourceSchemaToCheck.compareSchemata(scenario, "source") && targetSchemaToCheck.compareSchemata(scenario, "target")){
+                commonScenarios.put(scenario.getUserName(), scenario.getMappingTaskName());
+            }
         }
+        return commonScenarios;
     }
     
     private ArrayList<MappingScenario> trustedMappingsToCheck() throws DAOException, IOException{

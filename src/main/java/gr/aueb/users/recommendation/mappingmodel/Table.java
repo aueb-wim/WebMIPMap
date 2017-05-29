@@ -6,7 +6,7 @@
 package gr.aueb.users.recommendation.mappingmodel;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Objects;
 
 /**
  *
@@ -14,22 +14,47 @@ import java.util.HashMap;
  */
 public class Table {
     
-    private HashMap<String, ArrayList<Field>> table;
+    private ArrayList<Field> attributes;
+    private String tableName;
     
     public Table(){
-        this.table = new HashMap<>();
+        this.attributes = new ArrayList<>();
     }
     
-    public Table(String tableName, ArrayList<Field> fields){
-        this.table = new HashMap<>();
-        table.put(tableName, fields);
+    public Table(String tableName, ArrayList<Field> attributes){
+        this.attributes = new ArrayList<>();
+        this.tableName = tableName;
+        this.attributes.addAll(attributes);
     }
     
-    public void addTable(String tableName, ArrayList<Field> fields){
-        table.put(tableName, fields);
+    public void addTable(String tableName, ArrayList<Field> attributes){
+        this.attributes.addAll(attributes);
     }
     
-    public HashMap<String, ArrayList<Field>> getTableName(){
-        return table;
+    public ArrayList<Field> getAttributes(){
+        return attributes;
+    }
+    
+    public String getTableName(){
+        return tableName;
+    }
+    
+    @Override
+    public boolean equals(Object o){
+        if(o instanceof Table){
+            if(tableName.equals(((Table) o).tableName)
+                    && attributes.containsAll(((Table) o).getAttributes()) && ((Table) o).getAttributes().containsAll(attributes)){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 11 * hash + Objects.hashCode(this.attributes);
+        hash = 11 * hash + Objects.hashCode(this.tableName);
+        return hash;
     }
 }

@@ -53,4 +53,14 @@ public class MappingScenario {
         this.target = target;
     }
       
+    
+    public void printMappingScenario(){
+        System.out.println("--------------------------------");
+        System.out.println(getUserName());
+        System.out.println(getMappingTaskName());
+        getSource().printSchema();
+        getTarget().printSchema();
+        System.out.println("--------------------------------");
+    }
+    
 }

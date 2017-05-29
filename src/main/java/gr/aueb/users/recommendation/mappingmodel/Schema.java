@@ -6,9 +6,6 @@
 package gr.aueb.users.recommendation.mappingmodel;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  *
  * @author ioannisxar
@@ -43,15 +40,21 @@ public class Schema {
         return tables;
     }
     
+    public ArrayList<String> getTableNames(){
+        ArrayList<String> l = new ArrayList<>();
+        for(Table t: tables){
+            l.add(t.getTableName());
+        }
+        return l;
+    }
+    
     public void printSchema(){
         System.out.println("Database Name: " + databaseName);
         for(Table t: tables){
-            HashMap<String, ArrayList<Field>> table = t.getTableName();
-            for (Map.Entry<String, ArrayList<Field>> entry : table.entrySet()) {
-                System.out.println("Table Name: " + entry.getKey());
-                for(Field f : entry.getValue()){
-                    System.out.println("\tAttribute Name/Type: " + f.getFieldName() + " / " + f.getFieldType());
-                }
+            ArrayList<Field> attributes = t.getAttributes();
+            System.out.println("Table Name: " + t.getTableName());
+            for (Field f: attributes) {
+                System.out.println("\tAttribute Name/Type: " + f.getFieldName() + " / " + f.getFieldType());
             }
         }
     }
@@ -66,18 +69,21 @@ public class Schema {
             schema = scenario.getTarget();
         }
         
+        //checks if the database name in both schemata is same
         if(!databaseName.equals(schema.databaseName)){
             return false;
         }
-        for(Table t: tables){
-            HashMap<String, ArrayList<Field>> table = t.getTableName();
-            for (Map.Entry<String, ArrayList<Field>> entry : table.entrySet()) {
-                System.out.println("Table Name: " + entry.getKey());
-                for(Field f : entry.getValue()){
-                    System.out.println("\tAttribute Name/Type: " + f.getFieldName() + " / " + f.getFieldType());
-                }
-            }
+        
+        //checks if the table names are common in both schemata
+        if(!getTableNames().containsAll(schema.getTableNames()) || !schema.getTableNames().containsAll(getTableNames())){
+            return false;
         }
+        
+        //checks if all tables and attributes are same
+        if(!tables.containsAll(schema.getDatabaseTables()) || !schema.getDatabaseTables().containsAll(tables)){
+            return false;
+        }      
+        
         return matched;
     }
     
