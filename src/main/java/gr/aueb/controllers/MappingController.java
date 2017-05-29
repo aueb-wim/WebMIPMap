@@ -398,9 +398,6 @@ public class MappingController {
     public String RecommendMappingTask(@RequestParam("openedMappingName") String openedMappingName) throws DAOException, IOException {  
         ActionFindCommonMappingTasks commonMappings = new ActionFindCommonMappingTasks(user, openedMappingName);
         HashMap<String, String> commonScenarios = commonMappings.findCommonScenarions();
-        for (HashMap.Entry<String, String> entry : commonScenarios.entrySet()){
-            System.out.println(entry.getKey() + "/" + entry.getValue());
-        }
         if(commonScenarios.isEmpty()){
             return "No common scenarios have found";
         }
