@@ -1865,14 +1865,17 @@ function makeTrees (sourceTreeArray, targetTreeArray, sourceId, targetId, newplu
             var sourcePathArray = new Array();
             var sourceValue = null;
             var expression = null;
+            var isSimple = true;
             //constant
-            if(con.getParameter("constant")){                
+            if(con.getParameter("constant")){
+                isSimple = false;
                 sourceValue = $("#"+con.sourceId).siblings( ".span_hidden" ).text();
                 type = $("#"+con.sourceId.replace("-span","")).data("type");
                 expression = sourceValue;                
             }
             //function
             else if(con.getParameter("fromFunction")){
+                isSimple = false;
                 var relatedConnections = newplumb.getConnections({target: $('#'+con.sourceId).siblings('img').attr('id')});
                 for(var c=0; c<relatedConnections.length; c++) {
                     idSourceConnection = $('#'+relatedConnections[c].sourceId).closest('.myJsTree').attr('id');
@@ -1892,9 +1895,17 @@ function makeTrees (sourceTreeArray, targetTreeArray, sourceId, targetId, newplu
                     sourcePath = sourcePath.substring(0, sourcePath.lastIndexOf(" ("));
                 }
                 sourcePathArray.push(sourcePath);
-                expression = sourcePath;                    
+                expression = sourcePath;
+                sourceValue = expression;
             }
-            con.setParameter("sourcePath",expression.split("_")[0]);
+            var source = "";
+            if(isSimple){
+                con.setParameter("sourcePath",expression);
+                source = expression;
+            } else {
+                con.setParameter("sourcePath",expression.split("_")[0]);
+                source = expression.split("_")[0];
+            }
             con.setParameter("targetPath",targetPath);
             con.setParameter("scenarioNo",idNo);
             con.setParameter("sourcePathArray",sourcePathArray);
@@ -1919,8 +1930,8 @@ function makeTrees (sourceTreeArray, targetTreeArray, sourceId, targetId, newplu
                  $.ajax( {
                     url: 'EstablishedConnection',
                     type: 'POST',
-                    data: {'sourcePathArray[]':sourcePathArray, targetPath:targetPath, sourceValue: sourceValue.split("_")[0],
-                        expression: expression.split("_")[0], scenarioNo: idNo, type: type, sequence: sequence,
+                    data: {'sourcePathArray[]':sourcePathArray, targetPath:targetPath, sourceValue: source,
+                        expression: source, scenarioNo: idNo, type: type, sequence: sequence,
                         offset: offset, dbProperties: dbProperties},
                     beforeSend: function(xhr){
                             xhr.setRequestHeader("X-XSRF-TOKEN", csrftoken);

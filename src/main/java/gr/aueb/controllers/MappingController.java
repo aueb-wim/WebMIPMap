@@ -31,6 +31,7 @@ import gr.aueb.users.ActionGetUsers;
 import gr.aueb.users.ActionSendTrustRequest;
 import gr.aueb.users.ActionUpdatePercentage;
 import gr.aueb.users.recommendation.ActionFindCommonMappingTasks;
+import gr.aueb.users.recommendation.ActionGetRecommendedScenario;
 import it.unibas.spicy.persistence.DAOException;
 import it.unibas.spicygui.commons.Modello;
 import java.io.IOException;
@@ -203,7 +204,7 @@ public class MappingController {
     public String connectionInfo(@RequestParam(value="sourcePathArray[]",required=false) String[] sourcePathArray, @RequestParam("sourceValue") String sourceValueText,
             @RequestParam("targetPath") String targetPath,@RequestParam("expression") String transformationText, 
             @RequestParam("scenarioNo") String scenarioNo, @RequestParam("type") String type, 
-            @RequestParam("sequence") String sequence, @RequestParam("offset") String offset, @RequestParam(value="dbProperties", required=false) String dbProperties) {
+            @RequestParam("sequence") String sequence, @RequestParam(value="offset",required=false) String offset, @RequestParam(value="dbProperties", required=false) String dbProperties) {
         ActionNewConnection newConnection = new ActionNewConnection(modello, scenarioNo);                    
         newConnection.performAction(sourcePathArray, sourceValueText, targetPath ,transformationText, type, sequence, offset, dbProperties); 
         JSONObject outputObject = new JSONObject();
@@ -214,7 +215,7 @@ public class MappingController {
     public String updateConnectionInfo(@RequestParam("sourcePathArray[]") String[] sourcePathArray, @RequestParam("sourceValue") String sourceValueText,
             @RequestParam("sourcePath") String sourcePath, @RequestParam("targetPath") String targetPath,
             @RequestParam("expression") String transformationText, @RequestParam("scenarioNo") String scenarioNo,
-            @RequestParam("type") String type, @RequestParam("sequence") String sequence, @RequestParam("offset") String offset, 
+            @RequestParam("type") String type, @RequestParam("sequence") String sequence, @RequestParam(value="offset",required=false) String offset, 
             @RequestParam(value="dbProperties", required=false) String dbProperties) {       
         ActionDeleteConnection deleteConnection = new ActionDeleteConnection(modello, scenarioNo);
         deleteConnection.performAction(sourcePath, targetPath);
@@ -400,6 +401,9 @@ public class MappingController {
         HashMap<String, String> commonScenarios = commonMappings.findCommonScenarions();
         if(commonScenarios.isEmpty()){
             return "No common scenarios have found";
+        } else {
+            ActionGetRecommendedScenario recommendedScenario = new ActionGetRecommendedScenario(commonScenarios);
+            recommendedScenario.performAction();
         }
         return openedMappingName;
     }

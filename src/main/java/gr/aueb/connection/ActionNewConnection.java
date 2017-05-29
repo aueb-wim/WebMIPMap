@@ -44,7 +44,7 @@ public class ActionNewConnection {
         List<PathExpression> sourcePaths = null;
         String fromPath="";
         if(sourcePathArray!=null){
-            sourcePaths = new ArrayList<PathExpression>();
+            sourcePaths = new ArrayList<>();
             for(String sourcePathString : sourcePathArray){
                 PathExpression pathExpression = generatePathExpression(sourcePathString);
                 sourcePaths.add(pathExpression);
@@ -85,7 +85,7 @@ public class ActionNewConnection {
                     }
                 }
             }
-            else {
+            else if(sourcePathArray == null && sourceValueText!=null &&!sourceValueText.equals("")){
                 sourceValue = new ConstantValue(sourceValueText);
                 sourceValue.setType(type);
             }

@@ -32,6 +32,7 @@ public class OpenMappingScenario {
     
     private String user, scenarioName;
     private DAOXmlUtility daoUtility = new DAOXmlUtility();
+    
     public OpenMappingScenario(String user, String scenarioName){
         this.user = user;
         this.scenarioName = scenarioName;
@@ -62,6 +63,9 @@ public class OpenMappingScenario {
         return schema;
     }
     
+    public void getScenarioCorrespondences(){
+    
+    }
     
     private HashMap<String, ArrayList<String>> mappingFilePaths(Element element){
         ArrayList<String> filePaths = new ArrayList<>();
