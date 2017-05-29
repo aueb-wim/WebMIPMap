@@ -63,8 +63,15 @@ public class OpenMappingScenario {
         return schema;
     }
     
-    public void getScenarioCorrespondences(){
-    
+    public void getScenarioCorrespondences() throws DAOException{
+        String mappingTaskFile = MipmapDirectories.getUserPublicPath(user) + scenarioName +"/mapping_task.xml";
+        Document document = daoUtility.buildDOM(mappingTaskFile);
+        Element root = document.getRootElement().getChild("correspondences");
+        List<Element> correspondences = root.getChildren("correspondence");
+        for(Element correspondence: correspondences){
+            System.out.println(correspondence.getChildText("target-path"));
+            System.out.println(correspondence.getChildText("transformation-function"));
+        }
     }
     
     private HashMap<String, ArrayList<String>> mappingFilePaths(Element element){
