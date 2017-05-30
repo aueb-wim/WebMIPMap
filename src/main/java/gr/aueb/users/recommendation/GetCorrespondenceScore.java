@@ -6,18 +6,16 @@
 package gr.aueb.users.recommendation;
 
 import gr.aueb.context.ApplicationContextProvider;
-import gr.aueb.users.MipMapUser;
-import gr.aueb.users.recommendation.mappingmodel.Correspondence;
 import gr.aueb.users.recommendation.mappingmodel.UserMappingCorrespondences;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.alg.scoring.PageRank;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
-import org.json.simple.JSONObject;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
@@ -38,6 +36,8 @@ public class GetCorrespondenceScore {
         HashMap<String, Double> usersPRank = getUsersPagerank();
         //feature - users' Credibility
         HashMap<String, Double> usersCredibility = getUsersCredibility();
+        //feature - users' Total Connection normalized
+        HashMap<String, Double> usersTotalConnectionsNormalized = getUsersTotalConnectionsNormalized();
     }
     
     private HashMap<String, Double> getUsersPagerank(){
@@ -80,12 +80,30 @@ public class GetCorrespondenceScore {
     
     private HashMap<String, Double> getUsersCredibility(){
         HashMap<String, Double> usersCredibility = new HashMap<>();
-        
+        jdbcTemplate.query(
+            "SELECT \"username\", \"mappings_accepted\", \"mappings_total\" "
+            + "FROM mipmapuser;",
+            (rs, rowNum) ->  new Object[] { rs.getString("username"), rs.getString("mappings_accepted"), rs.getString("mappings_total") }
+        ).stream().forEach((obj) -> { 
+            usersCredibility.put(String.valueOf(obj[0]), (double)Integer.parseInt(String.valueOf(obj[1]))/Integer.parseInt(String.valueOf(obj[2])));
+        });
         return usersCredibility;
     }
     
-    private double getUsersTotalConnections(){
-        return 0.0;
+    private HashMap<String, Double> getUsersTotalConnectionsNormalized(){
+        HashMap<String, Double> usersTotalConnectionsNormalized = new HashMap<>(); 
+        String query = "SELECT min(\"mappings_total\") as min, max(\"mappings_total\") as max FROM mipmapuser;";
+        Map<String, Object> row = jdbcTemplate.queryForMap(query);
+        int min = Integer.parseInt(String.valueOf(row.get("min")));
+        int max = Integer.parseInt(String.valueOf(row.get("max")));
+        jdbcTemplate.query(
+            "SELECT \"username\", \"mappings_total\" "
+            + "FROM mipmapuser;",
+            (rs, rowNum) ->  new Object[] { rs.getString("username"), rs.getString("mappings_total") }
+        ).stream().forEach((obj) -> {
+            double score = (double)(Integer.valueOf(String.valueOf(obj[1])) - min)/(double)(max-min);
+            usersTotalConnectionsNormalized.put(String.valueOf(obj[0]), score);
+        });
+        return usersTotalConnectionsNormalized;
     }
-    
 }
