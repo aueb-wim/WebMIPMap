@@ -281,4 +281,14 @@ public class Costanti {
     public static final String SELECTED_TRANSFORMATION = "SELECTED_TRANSFORMATION";    // ATTENZIONE: COSTANTE DUPLICATA... (Vedi SpicyModelConstants)
     public static final String TYPE_RELATIONAL = "relational";
     public static final String SET_ROOT_IN_COMPOSITION = "SET_ROOT_IN_COMPOSITION";
+    //Recommendation, correspondence types
+    public static final String SIMPLE_CORRESPONDENCE = "SIMPLE_CONNECTION";
+    public static final String EMPTY_CORRESPONDENCE = "EMPTY_CONNECTION";
+    public static final String CONSTANT_STRING = "CONSTANT_STRING";
+    public static final String CONSTANT_NUMBER = "CONSTANT_NUMBER";
+    public static final String CONSTANT_DATE = "CONSTANT_DATE";
+    public static final String CONSTANT_DATETIME = "CONSTANT_DATETIME";
+    public static final String CONSTANT_SEQUENCE = "CONSTANT_SEQUENCE";
+    public static final String CONSTANT_DB_SEQUENCE = "CONSTANT_DB_SEQUENCE";
+    public static final String FUNCTION = "FUNCTION_CONNECTION";
 }

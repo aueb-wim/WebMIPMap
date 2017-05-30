@@ -6,6 +6,8 @@
 package gr.aueb.users.recommendation.mappingmodel;
 
 import it.unibas.spicy.model.correspondence.GetIdFromDb;
+import gr.aueb.mipmapgui.Costanti;
+import org.apache.commons.lang3.math.NumberUtils;
 
 /**
  *
@@ -17,37 +19,51 @@ public class Correspondence {
     private GetIdFromDb dbConfig;
     
     public Correspondence(){
-        dbConfig = null;
+        type = Costanti.EMPTY_CORRESPONDENCE;
     }
     
-    public Correspondence(String source, String target, String transformation, String type){
+    public Correspondence(String source, String target, String transformation){
         dbConfig = null;
         sequence = null;
         offset = null;
         this.source = source;
         this.target = target;
         this.transformation = transformation;
-        this.type = type;
+        if(!source.equals(transformation)){
+            type = Costanti.FUNCTION;
+        } else {
+            if(source.equals("date()")){
+                type = Costanti.CONSTANT_DATE;
+            } else if(source.equals("datetime()")){
+                type = Costanti.CONSTANT_DATETIME;
+            } else if(source.startsWith("\"") && source.endsWith("\"")){
+                type = Costanti.CONSTANT_STRING;
+            } else if(NumberUtils.isNumber(source)){
+                type = Costanti.CONSTANT_NUMBER;
+            } else {
+                type = Costanti.SIMPLE_CORRESPONDENCE;
+            }
+        }
     }
    
-    public Correspondence(String source, String target, String transformation, String type, String sequence, String offset){
+    public Correspondence(String source, String target, String transformation, String sequence, String offset){
         dbConfig = null;
         this.source = source;
         this.target = target;
         this.transformation = transformation;
-        this.type = type;
         this.sequence = sequence;
         this.offset = offset;
+        this.type = Costanti.CONSTANT_SEQUENCE;
     }
     
-    public Correspondence(String source, String target, String transformation, String type, String sequence, GetIdFromDb dbConfig){
+    public Correspondence(String source, String target, String transformation, String sequence, GetIdFromDb dbConfig){
         dbConfig = null;
         this.source = source;
         this.target = target;
         this.transformation = transformation;
-        this.type = type;
         this.sequence = sequence;
         this.dbConfig = dbConfig;
+        this.type = Costanti.CONSTANT_DB_SEQUENCE;
     }
     
     public String getSource() {

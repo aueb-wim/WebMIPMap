@@ -7,9 +7,11 @@ package gr.aueb.users.recommendation;
 
 import au.com.bytecode.opencsv.CSVReader;
 import gr.aueb.mipmapgui.controller.file.MipmapDirectories;
+import gr.aueb.users.recommendation.mappingmodel.Correspondence;
 import gr.aueb.users.recommendation.mappingmodel.Field;
 import gr.aueb.users.recommendation.mappingmodel.Schema;
 import gr.aueb.users.recommendation.mappingmodel.Table;
+import it.unibas.spicy.model.correspondence.GetIdFromDb;
 import it.unibas.spicy.persistence.DAOException;
 import it.unibas.spicy.persistence.xml.DAOXmlUtility;
 import it.unibas.spicy.utility.SpicyEngineConstants;
@@ -63,15 +65,49 @@ public class OpenMappingScenario {
         return schema;
     }
     
-    public void getScenarioCorrespondences() throws DAOException{
+    public ArrayList<Correspondence> getScenarioCorrespondences() throws DAOException{
         String mappingTaskFile = MipmapDirectories.getUserPublicPath(user) + scenarioName +"/mapping_task.xml";
         Document document = daoUtility.buildDOM(mappingTaskFile);
         Element root = document.getRootElement().getChild("correspondences");
         List<Element> correspondences = root.getChildren("correspondence");
+        ArrayList<Correspondence> correspondenceList = new ArrayList<>();
         for(Element correspondence: correspondences){
-            System.out.println(correspondence.getChildText("target-path"));
-            System.out.println(correspondence.getChildText("transformation-function"));
+            String target = correspondence.getChildTextTrim("target-path");
+            String function = correspondence.getChildTextTrim("transformation-function");
+            if(correspondence.getChild("source-paths").getChildTextTrim("source-path") != null){
+                String path = correspondence.getChild("source-paths").getChildTextTrim("source-path");
+                correspondenceList.add(new Correspondence(path, target, function));
+            } else if(correspondence.getChildTextTrim("source-value") != null){
+                String value = correspondence.getChildTextTrim("source-value");
+                if(!function.equals("newId()")){
+                    correspondenceList.add(new Correspondence(value, target, function));
+                } else {
+                    if(value.contains("getId()")){
+                        String sequence = correspondence.getChild("source-value").getChildTextTrim("sequence");
+                        Element driverElement = correspondence.getChild("source-value").getChild("relational").getChild("driver");
+                        Element uriElement = correspondence.getChild("source-value").getChild("relational").getChild("uri");
+                        Element schemaNameElement = correspondence.getChild("source-value").getChild("relational").getChild("schema");
+                        Element loginElement = correspondence.getChild("source-value").getChild("relational").getChild("login");
+                        Element passwordElement = correspondence.getChild("source-value").getChild("relational").getChild("password");
+                        Element tableElement = correspondence.getChild("source-value").getChild("relational").getChild("table");
+                        Element columnElement = correspondence.getChild("source-value").getChild("relational").getChild("column");
+                        Element functionElement = correspondence.getChild("source-value").getChild("relational").getChild("function");
+                        String schema = "";
+                        if (schemaNameElement != null) {
+                            schema = schemaNameElement.getTextTrim();
+                        }
+                        GetIdFromDb newIdFromDb = new GetIdFromDb(driverElement.getTextTrim(), uriElement.getTextTrim(), schema, loginElement.getTextTrim(), 
+                        passwordElement.getTextTrim(), tableElement.getTextTrim(), columnElement.getTextTrim(), functionElement.getTextTrim());
+                        correspondenceList.add(new Correspondence(value, target, function, sequence, newIdFromDb));
+                    } else {
+                        String sequence = correspondence.getChild("source-value").getChildTextTrim("sequence");
+                        String offset = correspondence.getChild("source-value").getChildTextTrim("offset");
+                        correspondenceList.add(new Correspondence(value, target, function, sequence, offset));
+                    }
+                }     
+            }
         }
+        return correspondenceList;
     }
     
     private HashMap<String, ArrayList<String>> mappingFilePaths(Element element){
