@@ -6,6 +6,7 @@
 package gr.aueb.users.recommendation;
 
 import gr.aueb.users.recommendation.mappingmodel.Correspondence;
+import gr.aueb.users.recommendation.mappingmodel.UserMappingCorrespondences;
 import it.unibas.spicy.persistence.DAOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,15 +25,18 @@ public class ActionGetRecommendedScenario {
     }
     
     public void performAction(){
-        HashMap<String, ArrayList<Correspondence>> correspondencesMap = new HashMap<>();
+        ArrayList<UserMappingCorrespondences> umc = new ArrayList<>();
         commonScenarios.forEach((user,mappingName)->{
             OpenMappingScenario scenarioToMatch = new OpenMappingScenario(user, mappingName);
             try {
-                correspondencesMap.put(user+"___"+mappingName, scenarioToMatch.getScenarioCorrespondences());
+                umc.add(new UserMappingCorrespondences(user, mappingName, scenarioToMatch.getScenarioCorrespondences()));
             } catch (DAOException ex) {
                 Exceptions.printStackTrace(ex);
             }
         });
+        GetCorrespondenceScore score = new GetCorrespondenceScore(umc);
+        score.performAction();
+        
     }
     
 }
