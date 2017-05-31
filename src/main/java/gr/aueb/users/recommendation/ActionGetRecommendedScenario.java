@@ -36,7 +36,7 @@ public class ActionGetRecommendedScenario {
                 Exceptions.printStackTrace(ex);
             }
         });
-        GetCorrespondenceScore score = new GetCorrespondenceScore(umc, this.scenario);
+        GetRecommendedCorrespondences score = new GetRecommendedCorrespondences(umc, this.scenario);
         score.performAction();
         
     }

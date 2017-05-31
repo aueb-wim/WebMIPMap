@@ -7,6 +7,7 @@ package gr.aueb.users.recommendation.mappingmodel;
 
 import it.unibas.spicy.model.correspondence.GetIdFromDb;
 import gr.aueb.mipmapgui.Costanti;
+import java.util.Objects;
 import org.apache.commons.lang3.math.NumberUtils;
 
 /**
@@ -15,11 +16,14 @@ import org.apache.commons.lang3.math.NumberUtils;
  */
 public class Correspondence {
     
-    private String source, target, transformation, type, sequence, offset;
+    private String source, target, transformation, type, sequence, offset, owner;
     private GetIdFromDb dbConfig;
-    
-    public Correspondence(){
+    private double score;    
+
+    public Correspondence(String target){
+        this.target = target;
         type = Costanti.EMPTY_CORRESPONDENCE;
+        transformation = "No transformation";
     }
     
     public Correspondence(String source, String target, String transformation){
@@ -120,6 +124,65 @@ public class Correspondence {
 
     public void setDbConfig(GetIdFromDb dbConfig) {
         this.dbConfig = dbConfig;
+    }
+    
+    public void addScore(double score){
+        this.score = score;
+    }
+    
+    public double getScore(){
+        return score;
+    }
+
+    public String getOwner() {
+        return owner;
+    }
+
+    public void setOwner(String owner) {
+        this.owner = owner;
+    }
+    
+    @Override
+    public boolean equals(Object o){
+        if(o instanceof Correspondence){
+            if(type.equals(((Correspondence) o).getType())){
+                switch (type) {
+                    case Costanti.SIMPLE_CORRESPONDENCE:
+                    case Costanti.EMPTY_CORRESPONDENCE:
+                    case Costanti.CONSTANT_DATE:
+                    case Costanti.CONSTANT_DATETIME:
+                    case Costanti.CONSTANT_DB_SEQUENCE:
+                        return true;
+                    case Costanti.CONSTANT_STRING:
+                    case Costanti.CONSTANT_NUMBER:
+                        return source.equals(((Correspondence) o).getSource());
+                    case Costanti.FUNCTION:
+                        return transformation.equals(((Correspondence) o).getTransformation());
+                    case Costanti.CONSTANT_SEQUENCE:
+                        return offset.equals(((Correspondence) o).getOffset());
+                    default:
+                        return false;
+                }
+            } else {
+                return false;
+            }
+        }else{
+            return false;
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 97 * hash + Objects.hashCode(this.source);
+        hash = 97 * hash + Objects.hashCode(this.target);
+        hash = 97 * hash + Objects.hashCode(this.transformation);
+        hash = 97 * hash + Objects.hashCode(this.type);
+        hash = 97 * hash + Objects.hashCode(this.sequence);
+        hash = 97 * hash + Objects.hashCode(this.offset);
+        hash = 97 * hash + Objects.hashCode(this.dbConfig);
+        hash = 97 * hash + (int) (Double.doubleToLongBits(this.score) ^ (Double.doubleToLongBits(this.score) >>> 32));
+        return hash;
     }
     
 }

@@ -7,9 +7,7 @@ package gr.aueb.users.recommendation;
 
 import gr.aueb.context.ApplicationContextProvider;
 import gr.aueb.users.recommendation.mappingmodel.Correspondence;
-import gr.aueb.users.recommendation.mappingmodel.Field;
 import gr.aueb.users.recommendation.mappingmodel.Schema;
-import gr.aueb.users.recommendation.mappingmodel.Table;
 import gr.aueb.users.recommendation.mappingmodel.UserMappingCorrespondences;
 import it.unibas.spicy.persistence.DAOException;
 import java.io.IOException;
@@ -28,14 +26,14 @@ import org.springframework.jdbc.core.JdbcTemplate;
  *
  * @author ioannisxar
  */
-public class GetCorrespondenceScore {
+public class GetRecommendedCorrespondences {
     
     private ArrayList<UserMappingCorrespondences> umc;
     private JdbcTemplate jdbcTemplate = (JdbcTemplate) ApplicationContextProvider.getApplicationContext().getBean("jdbcTemplate");
     private OpenMappingScenario scenario;
+    private double total;
     
-    
-    public GetCorrespondenceScore(ArrayList<UserMappingCorrespondences> umc, OpenMappingScenario scenario){
+    public GetRecommendedCorrespondences(ArrayList<UserMappingCorrespondences> umc, OpenMappingScenario scenario){
         this.umc = umc;
         this.scenario = scenario;
     }
@@ -49,13 +47,73 @@ public class GetCorrespondenceScore {
         HashMap<String, Double> usersTotalConnectionsNormalized = getUsersTotalConnectionsNormalized();
         //TODO: feature - users' Average Connections Per Mapping Scenario
         //HashMap<String, Double> usersAverageMappings = getUsersAverageMappings();
-        
-        // add empty correspondences
+
+        Map<String, ArrayList<Correspondence>> correspondencesPerTarget = getCorrespondencesPerTarget();
+        correspondencesPerTarget.forEach((target, set)->{
+            System.out.println(target);
+            set.forEach((corr)->{
+                System.out.println(corr.getOwner());
+                System.out.println(corr.getTransformation());
+                System.out.println(corr.getType());
+                System.out.println(corr.getScore());
+                System.out.println("------");
+            });
+            System.out.println("*****************************");
+        });
+    }
+    
+    private Map<String, ArrayList<Correspondence>> getCorrespondencesPerTarget() throws DAOException, IOException{
+        // add empty correspondences when it is applicable
         ArrayList<UserMappingCorrespondences> umcWithEmpty = new ArrayList<>();
         for(UserMappingCorrespondences u: umc){
             u.addCorrespondences(addEmptyCorrespondences(u.getCorrespondences(), scenario.getScenarioSchema("target", "public")));
             umcWithEmpty.add(u);
         } 
+        
+        //assign in each target the respective correspondences
+        Map<String, ArrayList<Correspondence>> correspondencesPerTarget = new HashMap<>();
+        umcWithEmpty.forEach((outer)->{
+            outer.getCorrespondences().forEach((corr)->{
+                if(!correspondencesPerTarget.containsKey(corr.getTarget())){
+                    ArrayList<Correspondence> l = new ArrayList<>();
+                    corr.setOwner(outer.getUser());
+                    l.add(corr);
+                    correspondencesPerTarget.put(corr.getTarget(), l);
+                } else {
+                    ArrayList<Correspondence> l = correspondencesPerTarget.get(corr.getTarget());
+                    corr.setOwner(outer.getUser());
+                    l.add(corr);
+                    correspondencesPerTarget.put(corr.getTarget(), l);
+                }
+            });
+        });
+        
+        //find the occurences of common correspondences and count their appearances
+        correspondencesPerTarget.forEach((target, list)->{
+            Map<Correspondence, Integer> occurrences = new HashMap<>();
+            list.forEach((c) -> {
+                if(!occurrences.containsKey(c)){
+                    occurrences.put(c, 1);
+                } else {
+                    occurrences.put(c, occurrences.get(c)+1);
+                }
+            });
+            
+            //calculate the total number of correspondences in this target
+            total = 0.0f;
+            for (float f : occurrences.values()) {
+                total += f;
+            }
+            
+            //assign score in each correspondence
+            ArrayList<Correspondence> newList = new ArrayList<>();
+            list.forEach((c) -> {
+                c.addScore((double)occurrences.get(c)/total);
+                newList.add(c);
+            });
+            correspondencesPerTarget.put(target, newList);
+        });
+        return correspondencesPerTarget;
     }
     
     private HashMap<String, Double> getUsersPagerank(){
@@ -134,16 +192,32 @@ public class GetCorrespondenceScore {
 
     private ArrayList<Correspondence> addEmptyCorrespondences(ArrayList<Correspondence> correspondences, Schema schema) throws DAOException, IOException {
         ArrayList<Correspondence> newCorrespondences = new ArrayList<>();
-        System.out.println("------- ATTRIBUTES -------");
-        for(String s: schema.getTableAttributeNames()){
-            System.out.println(s);
-        }
-        System.out.println("------- ATTRIBUTES -------");
-        System.out.println("------- CORRESPONDENCES -------");
+        Set<String> attributesToMatch = new HashSet();
         for(Correspondence corr: correspondences){
-            System.out.println(corr.getTarget());
+            String []splitTarget;
+            splitTarget = corr.getTarget().split("\\.");
+            attributesToMatch.add(splitTarget[splitTarget.length-3]+"."+splitTarget[splitTarget.length-1]);
         }
-        System.out.println("------- CORRESPONDENCES -------");
+        schema.getTableAttributeNames().forEach((s) -> {
+            if(!attributesToMatch.contains(s)){
+                String attr[] = s.split("\\.");
+                newCorrespondences.add(new Correspondence(schema.getDatabaseName()+"."+attr[0]+"."+attr[0]+"Tuple."+attr[1]));
+            }
+        });
         return newCorrespondences;
+    }
+
+    //print each user's schema
+    private void printUsersSchema() {
+        for(UserMappingCorrespondences u: umc){
+            System.out.println(u.getUser());
+            u.getCorrespondences().forEach((corr)->{
+                System.out.println(corr.getTarget());
+                if(corr.getTransformation() != null)
+                    System.out.println(corr.getTransformation());
+                System.out.println(corr.getType());
+            });
+            System.out.println("**********************");
+        }    
     }
 }
