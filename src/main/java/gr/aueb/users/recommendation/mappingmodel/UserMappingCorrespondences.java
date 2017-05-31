@@ -46,4 +46,11 @@ public class UserMappingCorrespondences {
         this.correspondences = correspondences;
     }
     
+    public void addCorrespondence(Correspondence correspondence){
+        this.correspondences.add(correspondence);
+    }
+    
+    public void addCorrespondences(ArrayList<Correspondence> correspondences){
+        this.correspondences.addAll(correspondences);
+    }
 }

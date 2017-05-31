@@ -6,7 +6,13 @@
 package gr.aueb.users.recommendation;
 
 import gr.aueb.context.ApplicationContextProvider;
+import gr.aueb.users.recommendation.mappingmodel.Correspondence;
+import gr.aueb.users.recommendation.mappingmodel.Field;
+import gr.aueb.users.recommendation.mappingmodel.Schema;
+import gr.aueb.users.recommendation.mappingmodel.Table;
 import gr.aueb.users.recommendation.mappingmodel.UserMappingCorrespondences;
+import it.unibas.spicy.persistence.DAOException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -23,21 +29,33 @@ import org.springframework.jdbc.core.JdbcTemplate;
  * @author ioannisxar
  */
 public class GetCorrespondenceScore {
+    
     private ArrayList<UserMappingCorrespondences> umc;
     private JdbcTemplate jdbcTemplate = (JdbcTemplate) ApplicationContextProvider.getApplicationContext().getBean("jdbcTemplate");
+    private OpenMappingScenario scenario;
     
     
-    public GetCorrespondenceScore(ArrayList<UserMappingCorrespondences> umc){
+    public GetCorrespondenceScore(ArrayList<UserMappingCorrespondences> umc, OpenMappingScenario scenario){
         this.umc = umc;
+        this.scenario = scenario;
     }
     
-    public void performAction(){
+    public void performAction() throws DAOException, IOException{
         //feature - users' Pagerank
         HashMap<String, Double> usersPRank = getUsersPagerank();
         //feature - users' Credibility
         HashMap<String, Double> usersCredibility = getUsersCredibility();
         //feature - users' Total Connection normalized
         HashMap<String, Double> usersTotalConnectionsNormalized = getUsersTotalConnectionsNormalized();
+        //TODO: feature - users' Average Connections Per Mapping Scenario
+        //HashMap<String, Double> usersAverageMappings = getUsersAverageMappings();
+        
+        // add empty correspondences
+        ArrayList<UserMappingCorrespondences> umcWithEmpty = new ArrayList<>();
+        for(UserMappingCorrespondences u: umc){
+            u.addCorrespondences(addEmptyCorrespondences(u.getCorrespondences(), scenario.getScenarioSchema("target", "public")));
+            umcWithEmpty.add(u);
+        } 
     }
     
     private HashMap<String, Double> getUsersPagerank(){
@@ -74,8 +92,15 @@ public class GetCorrespondenceScore {
         return usersPRank;
     }
     
-    private double getUsersAverageMappings(){
-        return 0.0;
+    //TODO
+    private HashMap<String, Double> getUsersAverageMappings(){
+        HashMap<String, Double> usersAverageMappings = new HashMap<>();
+        umc.forEach((corrList) -> {
+            System.out.println(corrList.getUser());
+            System.out.println(corrList.getMappingName());
+            System.out.println(corrList.getCorrespondences().size());
+        });
+        return usersAverageMappings;
     }
     
     private HashMap<String, Double> getUsersCredibility(){
@@ -105,5 +130,20 @@ public class GetCorrespondenceScore {
             usersTotalConnectionsNormalized.put(String.valueOf(obj[0]), score);
         });
         return usersTotalConnectionsNormalized;
+    }
+
+    private ArrayList<Correspondence> addEmptyCorrespondences(ArrayList<Correspondence> correspondences, Schema schema) throws DAOException, IOException {
+        ArrayList<Correspondence> newCorrespondences = new ArrayList<>();
+        System.out.println("------- ATTRIBUTES -------");
+        for(String s: schema.getTableAttributeNames()){
+            System.out.println(s);
+        }
+        System.out.println("------- ATTRIBUTES -------");
+        System.out.println("------- CORRESPONDENCES -------");
+        for(Correspondence corr: correspondences){
+            System.out.println(corr.getTarget());
+        }
+        System.out.println("------- CORRESPONDENCES -------");
+        return newCorrespondences;
     }
 }

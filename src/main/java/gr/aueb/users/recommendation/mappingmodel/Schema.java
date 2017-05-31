@@ -48,6 +48,17 @@ public class Schema {
         return l;
     }
     
+    public ArrayList<String> getTableAttributeNames(){
+        ArrayList<String> l = new ArrayList<>();
+        tables.forEach((t) -> {
+            String tableName = t.getTableName();
+            t.getAttributes().forEach((f) -> {
+                l.add(tableName+"."+f.getFieldName());
+            });
+        });
+        return l;
+    }
+    
     public void printSchema(){
         System.out.println("Database Name: " + databaseName);
         for(Table t: tables){
