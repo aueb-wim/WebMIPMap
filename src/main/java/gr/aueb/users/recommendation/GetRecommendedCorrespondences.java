@@ -52,9 +52,15 @@ public class GetRecommendedCorrespondences {
         correspondencesPerTarget.forEach((target, set)->{
             ArrayList<Correspondence> l = new ArrayList<>();
             set.forEach((corr)->{
+                System.out.println("----");
+                System.out.println(corr.getOwner());
+                System.out.println(corr.getTransformation());
+                System.out.println(corr.getTarget());
                 Double finalScore = calculateScore(usersPRank.get(corr.getOwner()), usersCredibility.get(corr.getOwner()), usersTotalConnectionsNormalized.get(corr.getOwner()), corr.getScore());
                 corr.setFinalScore(finalScore);
                 l.add(corr);
+                System.out.println(finalScore);
+                System.out.println("----");
             });
             Correspondence maxCorrespondence = l.stream().max(comparing(Correspondence::getFinalScore)).get();
             finalCorrespondences.put(target, maxCorrespondence);

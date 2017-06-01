@@ -5,6 +5,7 @@
  */
 package gr.aueb.users.recommendation;
 
+import gr.aueb.mipmapgui.Costanti;
 import gr.aueb.mipmapgui.controller.file.MipmapDirectories;
 import gr.aueb.users.recommendation.mappingmodel.Correspondence;
 import gr.aueb.users.recommendation.mappingmodel.UserMappingCorrespondences;
@@ -42,10 +43,11 @@ public class ActionGetRecommendedScenario {
     public void performAction() throws DAOException, IOException{
         ArrayList<UserMappingCorrespondences> umc = new ArrayList<>();
         commonScenarios.forEach((user,mappingName)->{
-            OpenMappingScenario scenarioToMatch = new OpenMappingScenario(user, mappingName);
+            String userClean = user.replace("%%%"+mappingName+"%%%", "");
+            OpenMappingScenario scenarioToMatch = new OpenMappingScenario(userClean, mappingName);
             this.scenario = scenarioToMatch;
             try {
-                umc.add(new UserMappingCorrespondences(user, mappingName, scenarioToMatch.getScenarioCorrespondences()));
+                umc.add(new UserMappingCorrespondences(userClean, mappingName, scenarioToMatch.getScenarioCorrespondences()));
             } catch (DAOException ex) {
                 Exceptions.printStackTrace(ex);
             }
@@ -78,19 +80,64 @@ public class ActionGetRecommendedScenario {
         try (PrintWriter writer = new PrintWriter(destFolderPath + "mapping_task.xml", "UTF-8")) {
             //write schema
             writer.write(mappingTaskSchema(initialPath));
-            writer.write("<correspondences>");
+            writer.write("\t<correspondences>"+"\n");
             //TODO - write correspondences in xml
-            
-            
-            writer.write("</correspondences>");
+            correspondences.forEach((target, correspondence)->{
+                if(!correspondence.getType().equals(Costanti.EMPTY_CORRESPONDENCE))
+                    writer.write("\t<correspondence>"+"\n");
+                
+                switch (correspondence.getType()) {
+                    case Costanti.SIMPLE_CORRESPONDENCE:
+                        writer.write("\t\t<source-paths>"+"\n");
+                        writer.write("\t\t<source-path>"+ correspondence.getSource()+"</source-path>"+"\n");
+                        writer.write("\t\t</source-paths>"+"\n");
+                        break;
+                    case Costanti.CONSTANT_DATE:
+                        writer.write("\t\t<source-paths />");
+                        writer.write("\t\t<source-value>date()</source-value>"+"\n");
+                        break;
+                    case Costanti.CONSTANT_DATETIME:
+                        writer.write("\t\t<source-paths />"+"\n");
+                        writer.write("\t\t<source-value>datetime()</source-value>"+"\n");
+                        break;
+                    case Costanti.CONSTANT_DB_SEQUENCE:
+                        writer.write("\t\t<source-paths />"+"\n");
+                        //TODO
+                        writer.write("\t\t<source-value>datetime()</source-value>"+"\n");
+                        break;
+                    case Costanti.CONSTANT_STRING:
+                        writer.write("\t\t<source-paths />"+"\n");
+                        writer.write("\t\t<source-value>"+correspondence.getSource()+"</source-value>"+"\n");
+                        break;
+                    case Costanti.CONSTANT_NUMBER:
+                        writer.write("\t\t<source-paths />"+"\n");
+                        writer.write("\t\t<source-value>"+correspondence.getSource()+"</source-value>"+"\n");
+                        break;
+                    case Costanti.FUNCTION:
+                        writer.write("\t\t<source-paths>"+"\n");
+                        writer.write("\t\t<source-path>"+ correspondence.getSource()+"</source-path>"+"\n");
+                        writer.write("\t\t</source-paths>"+"\n");
+                        break;
+                    case Costanti.CONSTANT_SEQUENCE:
+                        writer.write("\t\t<source-paths />"+"\n");
+                        //TODO
+                        writer.write("\t\t<source-value>datetime()</source-value>"+"\n");
+                        break;
+                    default:
+                }
+                if(!correspondence.getType().equals(Costanti.EMPTY_CORRESPONDENCE)){
+                    writer.write("\t\t<target-path>"+ correspondence.getTarget()+"</target-path>"+"\n");
+                    writer.write("\t\t<transformation-function>"+ correspondence.getTransformation()+"</transformation-function>"+"\n");
+                    writer.write("\t\t<confidence>"+ correspondence.getFinalScore()+"</confidence>"+"\n");
+                    writer.write("\t\t</correspondence>"+"\n");
+                }
+            });
+            writer.write("\t</correspondences>"+"\n");
             writer.write("</mappingtask>");
-        }
-        
-        
+        }        
     }
     
     private String mappingTaskSchema(String initialPath){
-    
         File file = new File(initialPath+"mapping_task.xml");
         BufferedReader reader = null;
         String mappingText = "";

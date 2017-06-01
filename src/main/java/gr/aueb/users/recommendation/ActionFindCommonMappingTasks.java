@@ -39,7 +39,7 @@ public class ActionFindCommonMappingTasks {
         for(MappingScenario scenario: trustedUserPublicMappings){
             //checks if both source and target schemata are common in both scenarios
             if(sourceSchemaToCheck.compareSchemata(scenario, "source") && targetSchemaToCheck.compareSchemata(scenario, "target")){
-                commonScenarios.put(scenario.getUserName(), scenario.getMappingTaskName());
+                commonScenarios.put(scenario.getUserName()+"%%%"+scenario.getMappingTaskName()+"%%%", scenario.getMappingTaskName());
             }
         }
         return commonScenarios;
