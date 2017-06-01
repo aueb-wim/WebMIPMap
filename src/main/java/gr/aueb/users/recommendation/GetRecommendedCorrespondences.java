@@ -12,6 +12,7 @@ import gr.aueb.users.recommendation.mappingmodel.UserMappingCorrespondences;
 import it.unibas.spicy.persistence.DAOException;
 import java.io.IOException;
 import java.util.ArrayList;
+import static java.util.Comparator.comparing;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -38,7 +39,7 @@ public class GetRecommendedCorrespondences {
         this.scenario = scenario;
     }
     
-    public void performAction() throws DAOException, IOException{
+    public Map<String, Correspondence> performAction() throws DAOException, IOException{
         //feature - users' Pagerank
         HashMap<String, Double> usersPRank = getUsersPagerank();
         //feature - users' Credibility
@@ -46,20 +47,19 @@ public class GetRecommendedCorrespondences {
         //feature - users' Total Connection normalized
         HashMap<String, Double> usersTotalConnectionsNormalized = getUsersTotalConnectionsNormalized();
         //TODO: feature - users' Average Connections Per Mapping Scenario
-        //HashMap<String, Double> usersAverageMappings = getUsersAverageMappings();
-
         Map<String, ArrayList<Correspondence>> correspondencesPerTarget = getCorrespondencesPerTarget();
+        Map<String, Correspondence> finalCorrespondences = new HashMap<>();
         correspondencesPerTarget.forEach((target, set)->{
-            System.out.println(target);
+            ArrayList<Correspondence> l = new ArrayList<>();
             set.forEach((corr)->{
-                System.out.println(corr.getOwner());
-                System.out.println(corr.getTransformation());
-                System.out.println(corr.getType());
-                System.out.println(corr.getScore());
-                System.out.println("------");
+                Double finalScore = calculateScore(usersPRank.get(corr.getOwner()), usersCredibility.get(corr.getOwner()), usersTotalConnectionsNormalized.get(corr.getOwner()), corr.getScore());
+                corr.setFinalScore(finalScore);
+                l.add(corr);
             });
-            System.out.println("*****************************");
+            Correspondence maxCorrespondence = l.stream().max(comparing(Correspondence::getFinalScore)).get();
+            finalCorrespondences.put(target, maxCorrespondence);
         });
+        return finalCorrespondences;
     }
     
     private Map<String, ArrayList<Correspondence>> getCorrespondencesPerTarget() throws DAOException, IOException{
@@ -207,6 +207,11 @@ public class GetRecommendedCorrespondences {
         return newCorrespondences;
     }
 
+    private Double calculateScore(Double pageRank, Double userCredibility, Double userTotalConnections, Double correspondenceCredibility) {
+        Double score = (pageRank + userCredibility + userTotalConnections + correspondenceCredibility)/4.0;
+        return score;
+    }
+    
     //print each user's schema
     private void printUsersSchema() {
         for(UserMappingCorrespondences u: umc){

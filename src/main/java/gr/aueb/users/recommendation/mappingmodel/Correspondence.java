@@ -18,7 +18,7 @@ public class Correspondence {
     
     private String source, target, transformation, type, sequence, offset, owner;
     private GetIdFromDb dbConfig;
-    private double score;    
+    private double score, finalScore;    
 
     public Correspondence(String target){
         this.target = target;
@@ -140,6 +140,14 @@ public class Correspondence {
 
     public void setOwner(String owner) {
         this.owner = owner;
+    }
+    
+    public double getFinalScore() {
+        return finalScore;
+    }
+
+    public void setFinalScore(double finalScore) {
+        this.finalScore = finalScore;
     }
     
     @Override
