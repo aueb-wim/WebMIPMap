@@ -22,17 +22,18 @@ import org.json.simple.JSONObject;
  */
 public class ActionFindCommonMappingTasks {
     
-    private String user, mappingName;
+    private String user, mappingName, mappingType;
     
-    public ActionFindCommonMappingTasks(String user, String mappingName){
+    public ActionFindCommonMappingTasks(String user, String mappingName, String mappingType){
         this.user = user;
         this.mappingName = mappingName;
+        this.mappingType = mappingType;
     }
     
     public HashMap<String, String> findCommonScenarions() throws DAOException, IOException{
         OpenMappingScenario scenarioToMatch = new OpenMappingScenario(user, mappingName);
-        Schema sourceSchemaToCheck = scenarioToMatch.getScenarioSchema("source", "private");
-        Schema targetSchemaToCheck = scenarioToMatch.getScenarioSchema("target", "private");
+        Schema sourceSchemaToCheck = scenarioToMatch.getScenarioSchema("source", mappingType);
+        Schema targetSchemaToCheck = scenarioToMatch.getScenarioSchema("target", mappingType);
         ArrayList<MappingScenario> trustedUserPublicMappings = trustedMappingsToCheck();
         HashMap<String, String> commonScenarios = new HashMap<>();
         for(MappingScenario scenario: trustedUserPublicMappings){

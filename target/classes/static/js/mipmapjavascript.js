@@ -27,6 +27,7 @@ var sourceForConn = new Object();
 var shiftXpixels = 10;
 var shiftYpixels = 40;
 var maxIconWidth = 150;
+var is_public ;
 var csrftoken = getCookie('XSRF-TOKEN');
 //common options for source arrow connections
 var commonSource = {
@@ -997,7 +998,7 @@ function saveTask(saveName, saveGlobal, savePublic){
 //pop up window with open task options
 function createLoadMappingTaskPopup(){
     //it can be private or public 
-    var is_public = false;
+    is_public = false;
     // if requests mappings from public path
     var public_path = null;
     
@@ -3789,16 +3790,32 @@ $(document).ready(function(){
     $( "#recommendMapping" ).click(function() {
         try {
             var mappingName = scenarioMap[currentScenario][0];
+            var mappingType;
+            if(scenarioMap[currentScenario][1]){
+                mappingType = "global";
+            } else if(scenarioMap[currentScenario][2]){
+                mappingType = "trusted";
+            } else {
+                if(is_public){
+                    mappingType = "public";
+                } else {
+                    mappingType = "private";
+                }
+            }
+            if(mappingType !== "global" && mappingType !== "trusted"){
             $.ajax( {
                 url: 'RecommendMappingTask',
                 type: 'GET',
-                data: {openedMappingName: mappingName},
+                data: {openedMappingName: mappingName, mappingType: mappingType},
                 beforeSend: function(xhr){
                         xhr.setRequestHeader("X-XSRF-TOKEN", csrftoken);
                 }
               } ).done(function(responseText) {
-                alert(responseText);
+                  alert(responseText);
             });
+        } else {
+            alert("Please select a mapping scenario from yours scenarios!");
+        }
         } catch (e) {
             if (e instanceof TypeError) {
               alert("Please select a mapping scenario!");

@@ -396,13 +396,14 @@ public class MappingController {
     } 
     
     @RequestMapping(value="/RecommendMappingTask", method=RequestMethod.GET, produces="text/plain")
-    public String RecommendMappingTask(@RequestParam("openedMappingName") String openedMappingName) throws DAOException, IOException {  
-        ActionFindCommonMappingTasks commonMappings = new ActionFindCommonMappingTasks(user, openedMappingName);
+    public String RecommendMappingTask(@RequestParam("openedMappingName") String openedMappingName, 
+            @RequestParam("mappingType") String mappingType) throws DAOException, IOException {  
+        ActionFindCommonMappingTasks commonMappings = new ActionFindCommonMappingTasks(user, openedMappingName, mappingType);
         HashMap<String, String> commonScenarios = commonMappings.findCommonScenarions();
         if(commonScenarios.isEmpty()){
             return "No common scenarios have found";
         } else {
-            ActionGetRecommendedScenario recommendedScenario = new ActionGetRecommendedScenario(commonScenarios);
+            ActionGetRecommendedScenario recommendedScenario = new ActionGetRecommendedScenario(commonScenarios, user, openedMappingName, mappingType);
             recommendedScenario.performAction();
         }
         return openedMappingName;
