@@ -45,22 +45,16 @@ public class GetRecommendedCorrespondences {
         //feature - users' Credibility
         HashMap<String, Double> usersCredibility = getUsersCredibility();
         //feature - users' Total Connection normalized
-        HashMap<String, Double> usersTotalConnectionsNormalized = getUsersTotalConnectionsNormalized();
+        HashMap<String, Double> usersTotalConnectionsNormalized = getUsersTotalAcceptedConnectionsNormalized();
         //TODO: feature - users' Average Connections Per Mapping Scenario
         Map<String, ArrayList<Correspondence>> correspondencesPerTarget = getCorrespondencesPerTarget();
         Map<String, Correspondence> finalCorrespondences = new HashMap<>();
         correspondencesPerTarget.forEach((target, set)->{
             ArrayList<Correspondence> l = new ArrayList<>();
             set.forEach((corr)->{
-                System.out.println("----");
-                System.out.println(corr.getOwner());
-                System.out.println(corr.getTransformation());
-                System.out.println(corr.getTarget());
                 Double finalScore = calculateScore(usersPRank.get(corr.getOwner()), usersCredibility.get(corr.getOwner()), usersTotalConnectionsNormalized.get(corr.getOwner()), corr.getScore());
                 corr.setFinalScore(finalScore);
                 l.add(corr);
-                System.out.println(finalScore);
-                System.out.println("----");
             });
             Correspondence maxCorrespondence = l.stream().max(comparing(Correspondence::getFinalScore)).get();
             finalCorrespondences.put(target, maxCorrespondence);
@@ -179,16 +173,16 @@ public class GetRecommendedCorrespondences {
         return usersCredibility;
     }
     
-    private HashMap<String, Double> getUsersTotalConnectionsNormalized(){
+    private HashMap<String, Double> getUsersTotalAcceptedConnectionsNormalized(){
         HashMap<String, Double> usersTotalConnectionsNormalized = new HashMap<>(); 
-        String query = "SELECT min(\"mappings_total\") as min, max(\"mappings_total\") as max FROM mipmapuser;";
+        String query = "SELECT min(\"mappings_accepted\") as min, max(\"mappings_accepted\") as max FROM mipmapuser;";
         Map<String, Object> row = jdbcTemplate.queryForMap(query);
         int min = Integer.parseInt(String.valueOf(row.get("min")));
         int max = Integer.parseInt(String.valueOf(row.get("max")));
         jdbcTemplate.query(
-            "SELECT \"username\", \"mappings_total\" "
+            "SELECT \"username\", \"mappings_accepted\" "
             + "FROM mipmapuser;",
-            (rs, rowNum) ->  new Object[] { rs.getString("username"), rs.getString("mappings_total") }
+            (rs, rowNum) ->  new Object[] { rs.getString("username"), rs.getString("mappings_accepted") }
         ).stream().forEach((obj) -> {
             double score = (double)(Integer.valueOf(String.valueOf(obj[1])) - min)/(double)(max-min);
             usersTotalConnectionsNormalized.put(String.valueOf(obj[0]), score);
@@ -213,8 +207,8 @@ public class GetRecommendedCorrespondences {
         return newCorrespondences;
     }
 
-    private Double calculateScore(Double pageRank, Double userCredibility, Double userTotalConnections, Double correspondenceCredibility) {
-        Double score = (pageRank + userCredibility + userTotalConnections + correspondenceCredibility)/4.0;
+    private Double calculateScore(Double pageRank, Double userCredibility, Double userTotalAcceptedConnections, Double correspondenceCredibility) {
+        Double score = (pageRank + userCredibility + userTotalAcceptedConnections + correspondenceCredibility)/4.0;
         return score;
     }
     

@@ -82,7 +82,7 @@ public class ActionGetRecommendedScenario {
             //write schema
             writer.write(mappingTaskSchema(initialPath));
             writer.write("\t<correspondences>"+"\n");
-            //TODO - write correspondences in xml
+            //write correspondences in xml
             correspondences.forEach((target, correspondence)->{
                 if(!correspondence.getType().equals(Costanti.EMPTY_CORRESPONDENCE))
                     writer.write("\t<correspondence>"+"\n");
