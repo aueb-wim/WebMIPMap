@@ -1880,8 +1880,18 @@ function makeTrees (sourceTreeArray, targetTreeArray, sourceId, targetId, newplu
             if(con.getParameter("constant")){
                 isSimple = false;
                 sourceValue = $("#"+con.sourceId).siblings( ".span_hidden" ).text();
-                type = $("#"+con.sourceId.replace("-span","")).data("type");
-                console.log(type);
+                
+                if(!sourceValue.includes("newId()")){
+                    if(sourceValue.includes("date()")){
+                        type = "date";
+                    } else if(sourceValue.includes("datetime()")){
+                        type = "datetime";
+                    } else if(isNumber(sourceValue)){
+                        type = "number";
+                    } else {
+                        type = "string";
+                    }
+                }
                 expression = sourceValue;                
             }
             //function
@@ -1927,11 +1937,18 @@ function makeTrees (sourceTreeArray, targetTreeArray, sourceId, targetId, newplu
                 }
                 sequence = sequence.slice(0,-1);
                 offset = OFFSET_MAPPING.get(sequence);
+                //type = "constant";
                 if (sequence === undefined) {
                     sequence = "null";
                     offset = "null";
                 } else {
                     dbProperties = JSON.stringify(GET_ID_FROM_DB.get(sequence));
+                    //type = 'getId()';
+                }
+                if (sequence !== "" && dbProperties === undefined) {
+                    type = "constant";
+                } else if(sequence !== "" && dbProperties !== undefined){
+                    type = "getId()";
                 }
             }
             con.setParameter("targetPath",targetPath);
@@ -1939,6 +1956,14 @@ function makeTrees (sourceTreeArray, targetTreeArray, sourceId, targetId, newplu
             con.setParameter("sourcePathArray",sourcePathArray);
             //do not create new connections on server when loading a mapping task
             if(lastAction!=="open"){
+                alert("Source: " + source);
+                alert("type: " + type);
+                alert("targetPath: " + targetPath);
+                alert("sourceValue: " + sourceValue);
+                alert("expression: " + expression);
+                alert("sequence" + sequence);
+                alert("offset" + offset);
+                alert("dbProperties" + dbProperties);
                  $.ajax( {
                     url: 'EstablishedConnection',
                     type: 'POST',
@@ -3799,8 +3824,6 @@ $(document).ready(function(){
     
     $( "#recommendMapping" ).click(function() {
         try {
-            //var activeTabNo =  $(document).attr("projectTreeRoot1");//.closest(".projectTreeRoot").data("scenarioNo");
-            alert(menucounter);
             var mappingName = scenarioMap[currentScenario][0];
             var mappingType;
             if(scenarioMap[currentScenario][1]){
@@ -3832,6 +3855,7 @@ $(document).ready(function(){
                 else{
                     loadSchemaTrees(obj.mappingTaskName, obj, false, true);
                     openedTasks.push(obj.mappingTaskName);
+                    savedTasks.push(obj.mappingTaskName);
                     loadedTasks.push(newScenarioNo);
                     scenarioMap[newScenarioNo] = [obj.mappingTaskName, false, true];
                 }
