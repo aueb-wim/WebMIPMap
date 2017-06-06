@@ -8,6 +8,7 @@ package gr.aueb.users.recommendation;
 import gr.aueb.mipmapgui.Costanti;
 import gr.aueb.mipmapgui.controller.file.MipmapDirectories;
 import gr.aueb.users.recommendation.mappingmodel.Correspondence;
+import gr.aueb.users.recommendation.mappingmodel.MappingScenario;
 import gr.aueb.users.recommendation.mappingmodel.UserMappingCorrespondences;
 import it.unibas.spicy.persistence.DAOException;
 import java.io.BufferedReader;
@@ -29,11 +30,11 @@ import org.openide.util.Exceptions;
  */
 public class ActionGetRecommendedScenario {
     
-    private HashMap<String, String> commonScenarios;
+    private HashMap<MappingScenario, String> commonScenarios;
     private OpenMappingScenario scenario;
     private String user, mappingName, mappingType;
     
-    public ActionGetRecommendedScenario(HashMap<String, String> commonScenarios, String user, String mappingName, String mappingType){
+    public ActionGetRecommendedScenario(HashMap<MappingScenario, String> commonScenarios, String user, String mappingName, String mappingType){
         this.commonScenarios = commonScenarios;
         this.user = user;
         this.mappingName = mappingName;
@@ -42,8 +43,8 @@ public class ActionGetRecommendedScenario {
     
     public void performAction() throws DAOException, IOException{
         ArrayList<UserMappingCorrespondences> umc = new ArrayList<>();
-        commonScenarios.forEach((user,mappingName)->{
-            String userClean = user.replace("%%%"+mappingName+"%%%", "");
+        commonScenarios.forEach((scenario,mappingName)->{
+            String userClean = scenario.getUserName();
             OpenMappingScenario scenarioToMatch = new OpenMappingScenario(userClean, mappingName);
             this.scenario = scenarioToMatch;
             try {

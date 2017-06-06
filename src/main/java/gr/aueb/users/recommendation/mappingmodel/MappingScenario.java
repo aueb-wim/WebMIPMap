@@ -5,6 +5,8 @@
  */
 package gr.aueb.users.recommendation.mappingmodel;
 
+import java.util.Objects;
+
 /**
  *
  * @author ioannisxar
@@ -53,6 +55,26 @@ public class MappingScenario {
         this.target = target;
     }
       
+    @Override
+    public boolean equals(Object o){
+        if(o instanceof MappingScenario){
+            if(userName.equals(((MappingScenario) o).getUserName()) && mappingTaskName.equals(((MappingScenario) o).getMappingTaskName())){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 89 * hash + Objects.hashCode(this.userName);
+        hash = 89 * hash + Objects.hashCode(this.mappingTaskName);
+        hash = 89 * hash + Objects.hashCode(this.source);
+        hash = 89 * hash + Objects.hashCode(this.target);
+        return hash;
+    }
+    
     
     public void printMappingScenario(){
         System.out.println("--------------------------------");

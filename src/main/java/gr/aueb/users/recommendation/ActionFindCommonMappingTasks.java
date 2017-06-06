@@ -30,16 +30,16 @@ public class ActionFindCommonMappingTasks {
         this.mappingType = mappingType;
     }
     
-    public HashMap<String, String> findCommonScenarions() throws DAOException, IOException{
+    public HashMap<MappingScenario, String> findCommonScenarions() throws DAOException, IOException{
         OpenMappingScenario scenarioToMatch = new OpenMappingScenario(user, mappingName);
         Schema sourceSchemaToCheck = scenarioToMatch.getScenarioSchema("source", mappingType);
         Schema targetSchemaToCheck = scenarioToMatch.getScenarioSchema("target", mappingType);
         ArrayList<MappingScenario> trustedUserPublicMappings = trustedMappingsToCheck();
-        HashMap<String, String> commonScenarios = new HashMap<>();
+        HashMap<MappingScenario, String> commonScenarios = new HashMap<>();
         for(MappingScenario scenario: trustedUserPublicMappings){
             //checks if both source and target schemata are common in both scenarios
             if(sourceSchemaToCheck.compareSchemata(scenario, "source") && targetSchemaToCheck.compareSchemata(scenario, "target")){
-                commonScenarios.put(scenario.getUserName()+"%%%"+scenario.getMappingTaskName()+"%%%", scenario.getMappingTaskName());
+                commonScenarios.put(scenario, scenario.getMappingTaskName());
             }
         }
         return commonScenarios;

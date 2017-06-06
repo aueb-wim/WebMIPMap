@@ -32,6 +32,7 @@ import gr.aueb.users.ActionSendTrustRequest;
 import gr.aueb.users.ActionUpdatePercentage;
 import gr.aueb.users.recommendation.ActionFindCommonMappingTasks;
 import gr.aueb.users.recommendation.ActionGetRecommendedScenario;
+import gr.aueb.users.recommendation.mappingmodel.MappingScenario;
 import it.unibas.spicy.persistence.DAOException;
 import it.unibas.spicygui.commons.Modello;
 import java.io.IOException;
@@ -399,7 +400,7 @@ public class MappingController {
     public String RecommendMappingTask(@RequestParam("openedMappingName") String openedMappingName, 
             @RequestParam("mappingType") String mappingType) throws DAOException, IOException {  
         ActionFindCommonMappingTasks commonMappings = new ActionFindCommonMappingTasks(user, openedMappingName, mappingType);
-        HashMap<String, String> commonScenarios = commonMappings.findCommonScenarions();
+        HashMap<MappingScenario, String> commonScenarios = commonMappings.findCommonScenarions();
         if(commonScenarios.isEmpty()){
             return "No common scenarios have found";
         } else {
