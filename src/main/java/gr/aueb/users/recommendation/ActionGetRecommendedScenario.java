@@ -43,12 +43,12 @@ public class ActionGetRecommendedScenario {
     
     public void performAction() throws DAOException, IOException{
         ArrayList<UserMappingCorrespondences> umc = new ArrayList<>();
-        commonScenarios.forEach((scenario,mappingName)->{
-            String userClean = scenario.getUserName();
-            OpenMappingScenario scenarioToMatch = new OpenMappingScenario(userClean, mappingName);
+        commonScenarios.forEach((sc,mapping)->{
+            String userClean = sc.getUserName();
+            OpenMappingScenario scenarioToMatch = new OpenMappingScenario(userClean, mapping);
             this.scenario = scenarioToMatch;
             try {
-                umc.add(new UserMappingCorrespondences(userClean, mappingName, scenarioToMatch.getScenarioCorrespondences()));
+                umc.add(new UserMappingCorrespondences(userClean, mapping, scenarioToMatch.getScenarioCorrespondences()));
             } catch (DAOException ex) {
                 Exceptions.printStackTrace(ex);
             }
@@ -103,8 +103,11 @@ public class ActionGetRecommendedScenario {
                         break;
                     case Costanti.CONSTANT_DB_SEQUENCE:
                         writer.write("\t\t<source-paths />"+"\n");
-                        //TODO
-                        writer.write("\t\t<source-value>datetime()</source-value>"+"\n");
+                        writer.write("\t\t<source-value>" + "\n");
+                        writer.write("\t\tnewId()_"+ correspondence.getSequence() + "\n");
+                        writer.write("\t\t<sequence>"+ correspondence.getSequence()+"</sequence>"+"\n");
+                        writer.write("\t\t<offset>0</offset>"+"\n");
+                        writer.write("\t\t</source-value>" + "\n");
                         break;
                     case Costanti.CONSTANT_STRING:
                         writer.write("\t\t<source-paths />"+"\n");
@@ -121,8 +124,11 @@ public class ActionGetRecommendedScenario {
                         break;
                     case Costanti.CONSTANT_SEQUENCE:
                         writer.write("\t\t<source-paths />"+"\n");
-                        //TODO
-                        writer.write("\t\t<source-value>datetime()</source-value>"+"\n");
+                        writer.write("\t\t<source-value>" + "\n");
+                        writer.write("\t\tnewId()_"+ correspondence.getSequence() + "\n");
+                        writer.write("\t\t<sequence>"+ correspondence.getSequence()+"</sequence>"+"\n");
+                        writer.write("\t\t<offset>"+ correspondence.getOffset()+"</offset>"+"\n");
+                        writer.write("\t\t</source-value>" + "\n");
                         break;
                     default:
                 }
