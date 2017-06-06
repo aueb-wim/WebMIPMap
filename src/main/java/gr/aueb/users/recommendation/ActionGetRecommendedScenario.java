@@ -41,7 +41,7 @@ public class ActionGetRecommendedScenario {
         this.mappingType = mappingType;
     }
     
-    public void performAction() throws DAOException, IOException{
+    public String performAction() throws DAOException, IOException{
         ArrayList<UserMappingCorrespondences> umc = new ArrayList<>();
         commonScenarios.forEach((sc,mapping)->{
             String userClean = sc.getUserName();
@@ -55,10 +55,11 @@ public class ActionGetRecommendedScenario {
         });
         GetRecommendedCorrespondences score = new GetRecommendedCorrespondences(umc, this.scenario);
         Map<String, Correspondence> recommendedCorrespondencesPerTarget = score.performAction();
-        generateMappingTask(recommendedCorrespondencesPerTarget);
+        String identifier = generateMappingTask(recommendedCorrespondencesPerTarget);
+        return "recommendedScenario_" + identifier;
     }
     
-    private void generateMappingTask(Map<String, Correspondence> correspondences) throws IOException{
+    private String generateMappingTask(Map<String, Correspondence> correspondences) throws IOException{
         String initialPath = "";
         String destFolderPath = "";
         Timestamp timestamp = new Timestamp(System.currentTimeMillis());
@@ -141,7 +142,8 @@ public class ActionGetRecommendedScenario {
             });
             writer.write("\t</correspondences>"+"\n");
             writer.write("</mappingtask>");
-        }        
+        }   
+        return identifier;
     }
     
     private String mappingTaskSchema(String initialPath){

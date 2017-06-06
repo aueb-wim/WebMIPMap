@@ -621,8 +621,16 @@ function createConstantOptionsPopup(item_id, newplumb, constants){
             $("#database").prop("checked", true);
         }
     } else if (connection_text.split("_")[0] === "date()"){
+        $("#funcOption").prop("checked", true);
+        $('#text_field').val("");
+        $('#text_field').prop('disabled', 'disabled');
+        $('#func_selection').prop('disabled', false);
         $("#func_selection").val("date()").change();
     } else if (connection_text.split("_")[0] === "datetime()"){
+        $("#funcOption").prop("checked", true);
+        $('#text_field').val("");
+        $('#text_field').prop('disabled', 'disabled');
+        $('#func_selection').prop('disabled', false);
         $("#func_selection").val("datetime()").change();
     }
     //Dialog Setup
@@ -642,7 +650,7 @@ function createConstantOptionsPopup(item_id, newplumb, constants){
                    valid = (txt_val!=="");
                    if (valid){                       
                         txt_val = '"'+txt_val+'"';
-                        result_string = txt_val;;
+                        result_string = txt_val;
                     }
                     else{
                         $("#text_field").addClass("ui-state-error");
@@ -1711,6 +1719,7 @@ function createSelectionConditionPopup(item_id){
 
 //left area context menu
 function customMenu(node) {
+    console.log(node);
     var nodeId = ($(node).attr('id'));
     var scenarioNo;
     if($('#'+nodeId).hasClass("projectTreeRoot")){
@@ -1872,6 +1881,7 @@ function makeTrees (sourceTreeArray, targetTreeArray, sourceId, targetId, newplu
                 isSimple = false;
                 sourceValue = $("#"+con.sourceId).siblings( ".span_hidden" ).text();
                 type = $("#"+con.sourceId.replace("-span","")).data("type");
+                console.log(type);
                 expression = sourceValue;                
             }
             //function
@@ -3789,6 +3799,8 @@ $(document).ready(function(){
     
     $( "#recommendMapping" ).click(function() {
         try {
+            //var activeTabNo =  $(document).attr("projectTreeRoot1");//.closest(".projectTreeRoot").data("scenarioNo");
+            alert(menucounter);
             var mappingName = scenarioMap[currentScenario][0];
             var mappingType;
             if(scenarioMap[currentScenario][1]){
@@ -3803,15 +3815,26 @@ $(document).ready(function(){
                 }
             }
             if(mappingType !== "global" && mappingType !== "trusted"){
+                var newScenarioNo = scenarioCounter+1;
+                lastAction = "open";
             $.ajax( {
                 url: 'RecommendMappingTask',
-                type: 'GET',
-                data: {openedMappingName: mappingName, mappingType: mappingType},
+                type: 'POST',
+                data: {openedMappingName: mappingName, mappingType: mappingType, scenarioNo : newScenarioNo},
                 beforeSend: function(xhr){
                         xhr.setRequestHeader("X-XSRF-TOKEN", csrftoken);
                 }
               } ).done(function(responseText) {
-                  alert(responseText);
+                var obj = $.parseJSON(responseText);
+                if(obj.hasOwnProperty("exception")){
+                    alert(obj.exception);                    
+                } 
+                else{
+                    loadSchemaTrees(obj.mappingTaskName, obj, false, true);
+                    openedTasks.push(obj.mappingTaskName);
+                    loadedTasks.push(newScenarioNo);
+                    scenarioMap[newScenarioNo] = [obj.mappingTaskName, false, true];
+                }
             });
         } else {
             alert("Please select a mapping scenario from yours scenarios!");

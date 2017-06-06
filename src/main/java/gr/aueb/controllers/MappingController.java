@@ -396,18 +396,25 @@ public class MappingController {
         return offset;
     } 
     
-    @RequestMapping(value="/RecommendMappingTask", method=RequestMethod.GET, produces="text/plain")
+    @RequestMapping(value="/RecommendMappingTask", method=RequestMethod.POST, produces="text/plain")
     public String RecommendMappingTask(@RequestParam("openedMappingName") String openedMappingName, 
-            @RequestParam("mappingType") String mappingType) throws DAOException, IOException {  
+            @RequestParam("mappingType") String mappingType, @RequestParam("scenarioNo") String scenarioNo) throws DAOException, IOException {  
         ActionFindCommonMappingTasks commonMappings = new ActionFindCommonMappingTasks(user, openedMappingName, mappingType);
         HashMap<MappingScenario, String> commonScenarios = commonMappings.findCommonScenarions();
         if(commonScenarios.isEmpty()){
             return "No common scenarios have found";
         } else {
             ActionGetRecommendedScenario recommendedScenario = new ActionGetRecommendedScenario(commonScenarios, user, openedMappingName, mappingType);
-            recommendedScenario.performAction();
+            String openName = recommendedScenario.performAction();
+            ActionOpenMappingTask actionOpenMapTask = new ActionOpenMappingTask(modello, Integer.valueOf(scenarioNo));
+            boolean userPublic = true;
+            if(mappingType.equals("private")){
+                userPublic = false;
+            }             
+            actionOpenMapTask.performAction(openName, user, false, userPublic, "");
+            JSONObject outputObject = actionOpenMapTask.getSchemaTreesObject();
+            return outputObject.toJSONString();
         }
-        return openedMappingName;
     }
     
     private void initialize(){

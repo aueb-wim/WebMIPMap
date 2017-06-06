@@ -40,7 +40,7 @@ public class ActionNewConnection {
         HashMap<Integer, Scenario> scenarioMap = (HashMap) modello.getBean(Costanti.SCENARIO_MAPPER);
         Scenario scenario = scenarioMap.get(Integer.valueOf(scenarioNo));
         MappingTask mappingTask = scenario.getMappingTask();
-        
+
         List<PathExpression> sourcePaths = null;
         String fromPath="";
         if(sourcePathArray!=null){

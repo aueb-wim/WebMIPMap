@@ -100,6 +100,7 @@ public class ActionOpenMappingTask {
         scenario = openCompositionFile(file.getPath(), file);
         JSONTreeCreator treeCreator = new JSONTreeCreator(modello);
         this.treeObject = treeCreator.createSchemaTrees();
+        this.treeObject.put("mappingTaskName", openName);
     }
     
     public JSONObject getSchemaTreesObject(){
