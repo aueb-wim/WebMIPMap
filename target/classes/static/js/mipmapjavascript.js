@@ -946,7 +946,8 @@ function saveTask(saveName, saveGlobal, savePublic){
                 trustedUser = (trustedUserMap[currentScenario])[0];
                 acceptedConns = (trustedUserMap[currentScenario])[1];
                 totalConns = (trustedUserMap[currentScenario])[2];
-
+                alert(acceptedConns);
+                alert(totalConns);
             }
         }
     } 
@@ -2389,7 +2390,7 @@ function createExistingConnections(connections, joins, newplumb, global, public)
 function checkGlobal(con, global) {    
     //different color for global mappings    
     if (global) {                  
-        con.setPaintStyle({strokeStyle: 'green', dashstyle:"16 1", lineWidth: 2}); 
+        con.setPaintStyle({strokeStyle: 'blue', dashstyle:"16 1", lineWidth: 2}); 
         con.setParameter("global_connection", true);
     }
 }
@@ -2508,7 +2509,7 @@ function setConnectionsDefaultColor(newplumb){
     for(var c=0; c<allConnections.length; c++) {
         if (allConnections[c].getParameter("connection")){ 
             if (allConnections[c].getParameter("global_connection")){
-                allConnections[c].setPaintStyle({strokeStyle: 'green'});
+                allConnections[c].setPaintStyle({strokeStyle: 'blue'});
             }
             else if (allConnections[c].getParameter("public_connection")){
                 allConnections[c].setPaintStyle({strokeStyle: 'LimeGreen'});
@@ -2797,7 +2798,7 @@ function createContextMenu2(newplumb,con,event){
                     }
                     else{
                         if (con.getParameter("global_connection")) {
-                            con.setPaintStyle({strokeStyle: 'green'});
+                            con.setPaintStyle({strokeStyle: 'blue'});
                         }
                         else if (con.getParameter("public_connection")) {
                             con.setPaintStyle({strokeStyle: 'LimeGreen'});
@@ -2830,7 +2831,7 @@ function createContextMenu2(newplumb,con,event){
                     }
                     else{
                         if (con.getParameter("global_connection")) {
-                            con.setPaintStyle({strokeStyle: 'green'});
+                            con.setPaintStyle({strokeStyle: 'blue'});
                         }
                         else if (con.getParameter("public_connection")) {
                             con.setPaintStyle({strokeStyle: 'LimeGreen'});
@@ -3849,7 +3850,7 @@ $(document).ready(function(){
                     openedTasks.push(obj.mappingTaskName);
                     savedTasks.push(obj.mappingTaskName);
                     loadedTasks.push(newScenarioNo);
-                    scenarioMap[newScenarioNo] = [obj.mappingTaskName, false, true];
+                    scenarioMap[newScenarioNo] = [obj.mappingTaskName, false, false];
                 }
             });
         } else {
