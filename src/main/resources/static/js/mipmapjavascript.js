@@ -1853,10 +1853,6 @@ function makeTrees (sourceTreeArray, targetTreeArray, sourceId, targetId, newplu
         con.setPaintStyle({strokeStyle: 'grey', dashstyle:"2 2", lineWidth: 2});
         //change the connection's curviness
         con.setConnector("Flowchart");
-        
-        /*if ($('#' + con.sourceId).parents(".jstreeSource").length===1){ 
-            con.endpoints[0].setAnchor("Left");                        
-        }    else{ con.endpoints[1].setAnchor("Right");}*/ 
         //and the position of the anchor
         con.endpoints[1].setAnchor("Right");     
         con.setParameter("connection",false);
@@ -1937,13 +1933,11 @@ function makeTrees (sourceTreeArray, targetTreeArray, sourceId, targetId, newplu
                 }
                 sequence = sequence.slice(0,-1);
                 offset = OFFSET_MAPPING.get(sequence);
-                //type = "constant";
                 if (sequence === undefined) {
                     sequence = "null";
                     offset = "null";
                 } else {
                     dbProperties = JSON.stringify(GET_ID_FROM_DB.get(sequence));
-                    //type = 'getId()';
                 }
                 if (sequence !== "" && dbProperties === undefined) {
                     type = "constant";
@@ -1956,14 +1950,6 @@ function makeTrees (sourceTreeArray, targetTreeArray, sourceId, targetId, newplu
             con.setParameter("sourcePathArray",sourcePathArray);
             //do not create new connections on server when loading a mapping task
             if(lastAction!=="open"){
-                alert("Source: " + source);
-                alert("type: " + type);
-                alert("targetPath: " + targetPath);
-                alert("sourceValue: " + sourceValue);
-                alert("expression: " + expression);
-                alert("sequence" + sequence);
-                alert("offset" + offset);
-                alert("dbProperties" + dbProperties);
                  $.ajax( {
                     url: 'EstablishedConnection',
                     type: 'POST',
@@ -3484,6 +3470,12 @@ $(document).ready(function(){
         }
     });
     
+    $( "#maindiv" ).tabs({
+    beforeActivate: function( event, ui ) {
+        currentScenario = ui.newPanel[0].id.split("-")[1];
+    }
+    });
+
     //tabs: close icon behavior
     tabs.delegate( "span.ui-icon-close", "click", function() {
         //if the close icon on the main tab is clicked
@@ -3987,6 +3979,8 @@ $(document).on('dblclick','.projectTreeNode',function() {
         }
     }
 });
+
+
 
 //on clicking on a trusted user, show the corresponding user's public tasks
 $(document).on('click','.usersTasksOption',function() {
