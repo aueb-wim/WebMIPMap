@@ -9,10 +9,12 @@ import gr.aueb.users.ActionGetUsers;
 import gr.aueb.users.recommendation.mappingmodel.MappingScenario;
 import gr.aueb.users.recommendation.mappingmodel.Schema;
 import it.unibas.spicy.persistence.DAOException;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import net.sf.jsqlparser.JSQLParserException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -30,7 +32,7 @@ public class ActionFindCommonMappingTasks {
         this.mappingType = mappingType;
     }
     
-    public HashMap<MappingScenario, String> findCommonScenarions() throws DAOException, IOException{
+    public HashMap<MappingScenario, String> findCommonScenarions() throws DAOException, IOException, FileNotFoundException, JSQLParserException{
         OpenMappingScenario scenarioToMatch = new OpenMappingScenario(user, mappingName);
         Schema sourceSchemaToCheck = scenarioToMatch.getScenarioSchema("source", mappingType);
         Schema targetSchemaToCheck = scenarioToMatch.getScenarioSchema("target", mappingType);
@@ -45,7 +47,7 @@ public class ActionFindCommonMappingTasks {
         return commonScenarios;
     }
     
-    private ArrayList<MappingScenario> trustedMappingsToCheck() throws DAOException, IOException{
+    private ArrayList<MappingScenario> trustedMappingsToCheck() throws DAOException, IOException, FileNotFoundException, FileNotFoundException, JSQLParserException, JSQLParserException, JSQLParserException, JSQLParserException, JSQLParserException{
         ArrayList<MappingScenario> trustedUserPublicMappings = new ArrayList<>();
         ActionGetUsers actionGetUsers = new ActionGetUsers();
         actionGetUsers.performAction(user);

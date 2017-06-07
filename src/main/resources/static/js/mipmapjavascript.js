@@ -3841,16 +3841,22 @@ $(document).ready(function(){
                         xhr.setRequestHeader("X-XSRF-TOKEN", csrftoken);
                 }
               } ).done(function(responseText) {
-                var obj = $.parseJSON(responseText);
+                var obj = "";
+                if(responseText === "No common scenarios have found"){
+                    alert(responseText);
+                } else {
+                    obj = $.parseJSON(responseText);
+                }
                 if(obj.hasOwnProperty("exception")){
                     alert(obj.exception);                    
-                } 
-                else{
-                    loadSchemaTrees(obj.mappingTaskName, obj, false, true);
-                    openedTasks.push(obj.mappingTaskName);
-                    savedTasks.push(obj.mappingTaskName);
-                    loadedTasks.push(newScenarioNo);
-                    scenarioMap[newScenarioNo] = [obj.mappingTaskName, false, false];
+                } else {
+                    if(responseText !== "No common scenarios have found"){
+                        loadSchemaTrees(obj.mappingTaskName, obj, false, true);
+                        openedTasks.push(obj.mappingTaskName);
+                        savedTasks.push(obj.mappingTaskName);
+                        loadedTasks.push(newScenarioNo);
+                        scenarioMap[newScenarioNo] = [obj.mappingTaskName, false, false];
+                    }
                 }
             });
         } else {

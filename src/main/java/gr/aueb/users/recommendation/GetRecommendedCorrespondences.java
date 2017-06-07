@@ -10,6 +10,7 @@ import gr.aueb.users.recommendation.mappingmodel.Correspondence;
 import gr.aueb.users.recommendation.mappingmodel.Schema;
 import gr.aueb.users.recommendation.mappingmodel.UserMappingCorrespondences;
 import it.unibas.spicy.persistence.DAOException;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import static java.util.Comparator.comparing;
@@ -17,6 +18,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import net.sf.jsqlparser.JSQLParserException;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.alg.scoring.PageRank;
 import org.jgrapht.graph.DefaultDirectedGraph;
@@ -39,7 +41,7 @@ public class GetRecommendedCorrespondences {
         this.scenario = scenario;
     }
     
-    public Map<String, Correspondence> performAction() throws DAOException, IOException{
+    public Map<String, Correspondence> performAction() throws DAOException, IOException, FileNotFoundException, JSQLParserException{
         //feature - users' Pagerank
         HashMap<String, Double> usersPRank = getUsersPagerank();
         //feature - users' Credibility
@@ -62,7 +64,7 @@ public class GetRecommendedCorrespondences {
         return finalCorrespondences;
     }
     
-    private Map<String, ArrayList<Correspondence>> getCorrespondencesPerTarget() throws DAOException, IOException{
+    private Map<String, ArrayList<Correspondence>> getCorrespondencesPerTarget() throws DAOException, IOException, FileNotFoundException, JSQLParserException{
         // add empty correspondences when it is applicable
         ArrayList<UserMappingCorrespondences> umcWithEmpty = new ArrayList<>();
         for(UserMappingCorrespondences u: umc){

@@ -12,17 +12,30 @@ import gr.aueb.users.recommendation.mappingmodel.Field;
 import gr.aueb.users.recommendation.mappingmodel.Schema;
 import gr.aueb.users.recommendation.mappingmodel.Table;
 import it.unibas.spicy.model.correspondence.GetIdFromDb;
+import it.unibas.spicy.model.datasource.INode;
+import it.unibas.spicy.model.mapping.IDataSourceProxy;
 import it.unibas.spicy.persistence.DAOException;
+import it.unibas.spicy.persistence.sql.DAOSql;
 import it.unibas.spicy.persistence.xml.DAOXmlUtility;
 import it.unibas.spicy.utility.SpicyEngineConstants;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import net.sf.jsqlparser.JSQLParserException;
+import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import net.sf.jsqlparser.statement.Statements;
+import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
+import net.sf.jsqlparser.statement.create.table.CreateTable;
 import org.jdom.Document;
 import org.jdom.Element;
 
@@ -40,7 +53,7 @@ public class OpenMappingScenario {
         this.scenarioName = scenarioName;
     }
     
-    public Schema getScenarioSchema(String inputType, String mode) throws DAOException, FileNotFoundException, IOException{
+    public Schema getScenarioSchema(String inputType, String mode) throws DAOException, FileNotFoundException, IOException, JSQLParserException{
         String mappingTaskFile;
         String basePath = "";
         if(mode.equals("private")){
@@ -114,20 +127,28 @@ public class OpenMappingScenario {
         ArrayList<String> filePaths = new ArrayList<>();
         String type = element.getChildText("type");
         Element typeElement = element.getChild(type.toLowerCase());
-        Element tableElement = typeElement.getChild(type.toLowerCase()+"-tables");
-        List<Element> tableElements = tableElement.getChildren();
-        String databaseName = typeElement.getChildText(type.toLowerCase() + "-db-name");
-        for (Element e: tableElements){
-            filePaths.add(e.getChildText("schema"));
-        }
         HashMap<String, ArrayList<String>> map = new HashMap<>();
-        map.put(databaseName, filePaths);
+        if(type.equalsIgnoreCase(SpicyEngineConstants.TYPE_CSV)){
+            Element tableElement = typeElement.getChild(type.toLowerCase()+"-tables");
+            List<Element> tableElements = tableElement.getChildren();
+            String databaseName = typeElement.getChildText(type.toLowerCase() + "-db-name");
+            for (Element e: tableElements){
+                filePaths.add(e.getChildText("schema"));
+            }
+            map.put(databaseName, filePaths);
+        } else if(type.equalsIgnoreCase(SpicyEngineConstants.TYPE_SQL)){
+             String databaseName = typeElement.getChildText(type.toLowerCase() + "-db-name");
+             String file = typeElement.getChildText("sql-file");
+             filePaths.add(file);
+             map.put(databaseName, filePaths);
+        }
         return map;
     }
     
-    private Table getTable(String filePath, String inputType) throws FileNotFoundException, IOException{
+    private Table getTable(String filePath, String inputType) throws FileNotFoundException, IOException, DAOException, JSQLParserException{
         ArrayList<Field> fieldList = new ArrayList<>();
         Table t = null;
+        //Get schema from CSV
         if(inputType.equals(SpicyEngineConstants.TYPE_CSV)){
             CSVReader reader = new CSVReader(new FileReader(filePath));
             for(String attribute : reader.readNext()){
@@ -135,8 +156,29 @@ public class OpenMappingScenario {
             }
             File f = new File(filePath);
             t = new Table(f.getName().split("\\.")[0], fieldList);
+        } // Get schema from SQL
+        else if(inputType.equals(SpicyEngineConstants.TYPE_SQL)){
+            String sqlScript = readFile(filePath, StandardCharsets.UTF_8).trim();            
+            Statements stmts = CCJSqlParserUtil.parseStatements(sqlScript);
+            List<net.sf.jsqlparser.statement.Statement> stmtss = stmts.getStatements();
+            for (net.sf.jsqlparser.statement.Statement stmt: stmtss){
+                if (stmt instanceof CreateTable){
+                    CreateTable createStmt = (CreateTable) stmt;
+                    String tableName = createStmt.getTable().getName(); 
+                    System.out.println(tableName);
+                    List<ColumnDefinition> columns = createStmt.getColumnDefinitions();
+                    for(ColumnDefinition cd: columns){
+                        System.out.println(cd.getColumnName());
+                    }
+                }
+            }
         }
         return t;
+    }
+    
+    static String readFile(String path, Charset encoding) throws IOException {
+      byte[] encoded = Files.readAllBytes(Paths.get(path));
+      return new String(encoded, encoding);
     }
     
 }
