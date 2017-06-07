@@ -41,7 +41,7 @@ public class Field {
     @Override
     public boolean equals(Object o){
         if(o instanceof Field){
-            return fieldName.equals(((Field) o).fieldName) && fieldType.equals(((Field) o).fieldType);
+            return fieldName.equals(((Field) o).fieldName) && fieldType.equalsIgnoreCase(((Field) o).fieldType);
         }
         return false;
     }

@@ -15,6 +15,7 @@ import it.unibas.spicy.model.correspondence.GetIdFromDb;
 import it.unibas.spicy.model.datasource.INode;
 import it.unibas.spicy.model.mapping.IDataSourceProxy;
 import it.unibas.spicy.persistence.DAOException;
+import it.unibas.spicy.persistence.relational.DAORelationalUtility;
 import it.unibas.spicy.persistence.sql.DAOSql;
 import it.unibas.spicy.persistence.xml.DAOXmlUtility;
 import it.unibas.spicy.utility.SpicyEngineConstants;
@@ -47,7 +48,6 @@ public class OpenMappingScenario {
     
     private String user, scenarioName;
     private DAOXmlUtility daoUtility = new DAOXmlUtility();
-    
     public OpenMappingScenario(String user, String scenarioName){
         this.user = user;
         this.scenarioName = scenarioName;
@@ -71,10 +71,11 @@ public class OpenMappingScenario {
         for (Map.Entry<String, ArrayList<String>> entry : map.entrySet()) {
             databaseName = entry.getKey();
             for (String filePath : entry.getValue()) {
-                sourceTables.add(getTable(basePath + "/" + filePath, sourceType));
+                sourceTables.addAll(getTable(basePath + "/" + filePath, sourceType));
             }
         }
         Schema schema = new Schema(databaseName, sourceTables);
+        //schema.printSchema();
         return schema;
     }
     
@@ -145,9 +146,9 @@ public class OpenMappingScenario {
         return map;
     }
     
-    private Table getTable(String filePath, String inputType) throws FileNotFoundException, IOException, DAOException, JSQLParserException{
+    private ArrayList<Table> getTable(String filePath, String inputType) throws FileNotFoundException, IOException, DAOException, JSQLParserException{
         ArrayList<Field> fieldList = new ArrayList<>();
-        Table t = null;
+        ArrayList<Table> t = new ArrayList<>();
         //Get schema from CSV
         if(inputType.equals(SpicyEngineConstants.TYPE_CSV)){
             CSVReader reader = new CSVReader(new FileReader(filePath));
@@ -155,21 +156,23 @@ public class OpenMappingScenario {
                 fieldList.add(new Field(attribute, "String"));
             }
             File f = new File(filePath);
-            t = new Table(f.getName().split("\\.")[0], fieldList);
+            t.add(new Table(f.getName().split("\\.")[0], fieldList));
         } // Get schema from SQL
         else if(inputType.equals(SpicyEngineConstants.TYPE_SQL)){
             String sqlScript = readFile(filePath, StandardCharsets.UTF_8).trim();            
             Statements stmts = CCJSqlParserUtil.parseStatements(sqlScript);
             List<net.sf.jsqlparser.statement.Statement> stmtss = stmts.getStatements();
             for (net.sf.jsqlparser.statement.Statement stmt: stmtss){
+                fieldList = new ArrayList<>();
                 if (stmt instanceof CreateTable){
                     CreateTable createStmt = (CreateTable) stmt;
                     String tableName = createStmt.getTable().getName(); 
-                    System.out.println(tableName);
                     List<ColumnDefinition> columns = createStmt.getColumnDefinitions();
                     for(ColumnDefinition cd: columns){
-                        System.out.println(cd.getColumnName());
+                        fieldList.add(new Field(cd.getColumnName(), 
+                                DAORelationalUtility.convertDBTypeToDataSourceType(cd.getColDataType().getDataType())));
                     }
+                    t.add(new Table(tableName, fieldList));
                 }
             }
         }
