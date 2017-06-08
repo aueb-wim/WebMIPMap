@@ -3853,6 +3853,8 @@ $(document).ready(function(){
                         loadSchemaTrees(obj.mappingTaskName, obj, false, true);
                         openedTasks.push(obj.mappingTaskName);
                         savedTasks.push(obj.mappingTaskName);
+                        if(is_public)
+                            publicTasks.push(obj.mappingTaskName);
                         loadedTasks.push(newScenarioNo);
                         scenarioMap[newScenarioNo] = [obj.mappingTaskName, false, false];
                     }
@@ -3985,23 +3987,6 @@ $(document).on('dblclick','.projectTreeNode',function() {
         }
     }
 });
-
-
-
-//on clicking on a trusted user, show the corresponding user's public tasks
-//$(document).on('click','.usersTasksOption',function() {
-//    var publicTasks = $('#'+$(this).attr('id')).data('publicTasks');
-//    alert('#'+$(this).attr('id'));
-//     //first delete previous options
-//    $('#users-tasks-selection').find('option').remove();
-//    for (var task = 0; task < publicTasks.length; task++) {
-//        alert("mpika");
-//        //first delete previous options and then append the corresponding user's public tasks
-//        $('#users-tasks-selection').append($("<option></option>").attr("value",publicTasks[task].taskName).text(publicTasks[task].taskName)); 
-//    }
-//    //also remove error class, if present
-//    $('#users-tasks-selection').removeClass('ui-state-error');
-//});
 
 //on key press remove error class from Save menu, if present
 $(document).on("keypress", "#save_name", function() { 
