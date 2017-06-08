@@ -95,7 +95,7 @@ public class ActionOpenMappingTask {
         }
         else{
             mappingTaskFile = MipmapDirectories.getUserPrivatePath(user) + openName +"/mapping_task.xml";
-        }
+        }   
         File file = new File(mappingTaskFile);
         scenario = openCompositionFile(file.getPath(), file);
         JSONTreeCreator treeCreator = new JSONTreeCreator(modello);

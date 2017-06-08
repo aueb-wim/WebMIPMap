@@ -35,12 +35,14 @@ import gr.aueb.users.recommendation.ActionGetRecommendedScenario;
 import gr.aueb.users.recommendation.mappingmodel.MappingScenario;
 import it.unibas.spicy.persistence.DAOException;
 import it.unibas.spicygui.commons.Modello;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.Principal;
 import java.sql.SQLException;
 import java.util.HashMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import net.sf.jsqlparser.JSQLParserException;
 import org.apache.commons.lang3.StringUtils;
 import org.json.simple.JSONObject;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -398,7 +400,7 @@ public class MappingController {
     
     @RequestMapping(value="/RecommendMappingTask", method=RequestMethod.POST, produces="text/plain")
     public String RecommendMappingTask(@RequestParam("openedMappingName") String openedMappingName, 
-            @RequestParam("mappingType") String mappingType, @RequestParam("scenarioNo") String scenarioNo) throws DAOException, IOException {  
+            @RequestParam("mappingType") String mappingType, @RequestParam("scenarioNo") String scenarioNo) throws DAOException, IOException, FileNotFoundException, JSQLParserException, JSQLParserException, JSQLParserException {  
         ActionFindCommonMappingTasks commonMappings = new ActionFindCommonMappingTasks(user, openedMappingName, mappingType);
         HashMap<MappingScenario, String> commonScenarios = commonMappings.findCommonScenarions();
         if(commonScenarios.isEmpty()){
@@ -408,10 +410,12 @@ public class MappingController {
             String openName = recommendedScenario.performAction();
             ActionOpenMappingTask actionOpenMapTask = new ActionOpenMappingTask(modello, Integer.valueOf(scenarioNo));
             boolean userPublic = true;
+            String path = "public_path";
             if(mappingType.equals("private")){
                 userPublic = false;
+                path = "";
             }             
-            actionOpenMapTask.performAction(openName, user, false, userPublic, "");
+            actionOpenMapTask.performAction(openName, user, false, userPublic, path);
             JSONObject outputObject = actionOpenMapTask.getSchemaTreesObject();
             return outputObject.toJSONString();
         }

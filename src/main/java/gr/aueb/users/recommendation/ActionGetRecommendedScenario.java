@@ -21,6 +21,8 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
+import net.sf.jsqlparser.JSQLParserException;
 import org.apache.commons.io.FileUtils;
 import org.openide.util.Exceptions;
 
@@ -41,7 +43,7 @@ public class ActionGetRecommendedScenario {
         this.mappingType = mappingType;
     }
     
-    public String performAction() throws DAOException, IOException{
+    public String performAction() throws DAOException, IOException, FileNotFoundException, JSQLParserException{
         ArrayList<UserMappingCorrespondences> umc = new ArrayList<>();
         commonScenarios.forEach((sc,mapping)->{
             String userClean = sc.getUserName();
@@ -103,10 +105,11 @@ public class ActionGetRecommendedScenario {
                         writer.write("\t\t<source-value>datetime()</source-value>"+"\n");
                         break;
                     case Costanti.CONSTANT_DB_SEQUENCE:
+                        String seq = generateString(6);
                         writer.write("\t\t<source-paths />"+"\n");
                         writer.write("\t\t<source-value>" + "\n");
-                        writer.write("\t\tnewId()_"+ correspondence.getSequence() + "\n");
-                        writer.write("\t\t<sequence>"+ correspondence.getSequence()+"</sequence>"+"\n");
+                        writer.write("\t\tnewId()_"+ seq + "\n");
+                        writer.write("\t\t<sequence>"+ seq +"</sequence>"+"\n");
                         writer.write("\t\t<offset>0</offset>"+"\n");
                         writer.write("\t\t</source-value>" + "\n");
                         break;
@@ -124,10 +127,11 @@ public class ActionGetRecommendedScenario {
                         writer.write("\t\t</source-paths>"+"\n");
                         break;
                     case Costanti.CONSTANT_SEQUENCE:
+                        String seq1 = generateString(6);
                         writer.write("\t\t<source-paths />"+"\n");
                         writer.write("\t\t<source-value>" + "\n");
-                        writer.write("\t\tnewId()_"+ correspondence.getSequence() + "\n");
-                        writer.write("\t\t<sequence>"+ correspondence.getSequence()+"</sequence>"+"\n");
+                        writer.write("\t\tnewId()_"+ seq1 + "\n");
+                        writer.write("\t\t<sequence>"+ seq1 +"</sequence>"+"\n");
                         writer.write("\t\t<offset>"+ correspondence.getOffset()+"</offset>"+"\n");
                         writer.write("\t\t</source-value>" + "\n");
                         break;
@@ -171,5 +175,14 @@ public class ActionGetRecommendedScenario {
             }
         }
         return mappingText;
+    }
+    
+    private String generateString(int length){
+        Random rng = new Random();
+        String alphabet = "abcdefghijklmnopqrstuvwxyz1234567890";
+        char[] text = new char[length];
+        for (int i = 0; i < length; i++)
+            text[i] = alphabet.charAt(rng.nextInt(alphabet.length()));
+        return new String(text);
     }
 }
