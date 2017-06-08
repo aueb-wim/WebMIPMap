@@ -864,7 +864,7 @@ function createSaveMappingTaskPopup(saveGlobal, savePublic){
         //heightNew = 40;
     //}   
     
-    save_task_text = save_task_text + '</form><br><br>';
+    save_task_text = save_task_text + '<br><br></form>';
     
     $("#dialog_container").append(save_task_text);
     
@@ -1476,6 +1476,7 @@ function createOpenUsersTasksPopup(usersData){
                     } 
                     else{
                         var items = obj["public_schemas"];
+                        $('#users-tasks-selection').find('option').remove();
                         $.each(items, function (i, item) {
                             $('#users-tasks-selection').append($('<option>', { 
                                 value: item,
@@ -1483,8 +1484,7 @@ function createOpenUsersTasksPopup(usersData){
                             }));
                         });
                     }
-                });  
-        
+                });
     });
 }
 
@@ -3989,17 +3989,19 @@ $(document).on('dblclick','.projectTreeNode',function() {
 
 
 //on clicking on a trusted user, show the corresponding user's public tasks
-$(document).on('click','.usersTasksOption',function() {
-    var publicTasks = $('#'+$(this).attr('id')).data('publicTasks');
-     //first delete previous options
-    $('#users-tasks-selection').find('option').remove();
-    for (var task = 0; task < publicTasks.length; task++) {
-        //first delete previous options and then append the corresponding user's public tasks
-        $('#users-tasks-selection').append($("<option></option>").attr("value",publicTasks[task].taskName).text(publicTasks[task].taskName)); 
-    }
-    //also remove error class, if present
-    $('#users-tasks-selection').removeClass('ui-state-error');
-});
+//$(document).on('click','.usersTasksOption',function() {
+//    var publicTasks = $('#'+$(this).attr('id')).data('publicTasks');
+//    alert('#'+$(this).attr('id'));
+//     //first delete previous options
+//    $('#users-tasks-selection').find('option').remove();
+//    for (var task = 0; task < publicTasks.length; task++) {
+//        alert("mpika");
+//        //first delete previous options and then append the corresponding user's public tasks
+//        $('#users-tasks-selection').append($("<option></option>").attr("value",publicTasks[task].taskName).text(publicTasks[task].taskName)); 
+//    }
+//    //also remove error class, if present
+//    $('#users-tasks-selection').removeClass('ui-state-error');
+//});
 
 //on key press remove error class from Save menu, if present
 $(document).on("keypress", "#save_name", function() { 
