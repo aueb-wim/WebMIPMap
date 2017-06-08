@@ -171,15 +171,12 @@ public class MappingController {
             @RequestParam("overwrite") boolean overwrite, @RequestParam(value="previousName", required=false) String previousName, 
             @RequestParam(value="fromGlobal", required=false) boolean fromGlobal, @RequestParam(value="fromTrustedUser", required=false) boolean fromTrustedUser, 
             @RequestParam(value="trustedUser", required=false) String trustedUser) throws Exception {
-            
         if ((previousName == null || previousName.equals("")) && overwrite)
             throw new Exception("Cannot save mapping task.");
-
         ActionSaveMappingTask actionSaveMapTask = new ActionSaveMappingTask(modello, Integer.valueOf(scenarioNo));
         actionSaveMapTask.performAction(saveName, user, overwrite, previousName, fromGlobal, fromTrustedUser, trustedUser, false, true);
         JSONObject outputObject = new JSONObject();
-        outputObject.put("saveName",saveName);
-        
+        outputObject.put("saveName", saveName);
         return outputObject.toJSONString();
     }
     

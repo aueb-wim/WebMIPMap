@@ -946,8 +946,6 @@ function saveTask(saveName, saveGlobal, savePublic){
                 trustedUser = (trustedUserMap[currentScenario])[0];
                 acceptedConns = (trustedUserMap[currentScenario])[1];
                 totalConns = (trustedUserMap[currentScenario])[2];
-                alert(acceptedConns);
-                alert(totalConns);
             }
         }
     } 
@@ -961,7 +959,8 @@ function saveTask(saveName, saveGlobal, savePublic){
     else {
         url ='SaveMappingTask';
     }
-    
+    if(is_public)
+        trustedUser = "public_path";
     $.ajax( {
         url: url,
         type: 'POST',

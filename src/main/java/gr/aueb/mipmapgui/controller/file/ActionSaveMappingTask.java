@@ -21,17 +21,13 @@
  */
  
 package gr.aueb.mipmapgui.controller.file;
-
-import static gr.aueb.controllers.MappingController.user;
 import it.unibas.spicy.model.mapping.MappingTask;
 import it.unibas.spicy.persistence.DAOException;
 import it.unibas.spicy.persistence.DAOMappingTask;
 import gr.aueb.mipmapgui.Costanti;
 import it.unibas.spicygui.commons.Modello;
 import gr.aueb.mipmapgui.controller.Scenario;
-import it.unibas.spicy.model.correspondence.ValueCorrespondence;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.FileSystemException;
 import java.nio.file.Files;
@@ -67,8 +63,11 @@ public class ActionSaveMappingTask{
                 else if (fromTrustedUser) {
                     initialPath = MipmapDirectories.getUserPublicPath(trustedUser) + previousName +"/";
                     mappingTaskFile = initialPath + "mapping_task_" + user.hashCode() + ".xml";
-                }
-                else {
+                } else if(trustedUser != null && trustedUser.equals("public_path")){
+                    initialPath = MipmapDirectories.getUserPublicPath(user) + previousName +"/";
+                    mappingTaskFile = initialPath + "mapping_task_new.xml";
+                } else {
+                    System.out.println("mpika1");
                     initialPath = MipmapDirectories.getUserPrivatePath(user) + previousName +"/";
                     mappingTaskFile = initialPath + "mapping_task_new.xml";
                 }
@@ -117,8 +116,7 @@ public class ActionSaveMappingTask{
                 Files.move(initFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
             }catch (FileSystemException ex){
                 System.out.println(ex.getMessage());
-            }
-            
+            } 
         }
         else {
             //move mapping task xml file
