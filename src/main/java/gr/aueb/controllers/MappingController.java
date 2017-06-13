@@ -27,6 +27,7 @@ import gr.aueb.mipmapgui.view.tree.ActionDeleteDuplicateNode;
 import gr.aueb.mipmapgui.view.tree.ActionDuplicateNode;
 import gr.aueb.mipmapgui.view.tree.ActionSelectionCondition;
 import gr.aueb.users.ActionAnswerTrustRequest;
+import gr.aueb.users.ActionDeleteTrustedUser;
 import gr.aueb.users.ActionGetUsers;
 import gr.aueb.users.ActionSendTrustRequest;
 import gr.aueb.users.ActionUpdatePercentage;
@@ -416,6 +417,13 @@ public class MappingController {
             JSONObject outputObject = actionOpenMapTask.getSchemaTreesObject();
             return outputObject.toJSONString();
         }
+    }
+    
+    @RequestMapping(value="/RemoveTrust", method=RequestMethod.POST, produces="text/plain")
+    public String removeTrust(Principal principal, @RequestParam("userId") String userId) {
+        ActionDeleteTrustedUser delete = new ActionDeleteTrustedUser();
+        delete.performAction(principal.getName(), userId);
+        return delete.getMessage().toJSONString();
     }
     
     private void initialize(){

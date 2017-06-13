@@ -1158,6 +1158,105 @@ function createOpenGlobalMappingTaskPopup(){
 }
 
 // working - xarchakos
+//pop up window for removing trusted users
+function removeTrustedUsersPopup(trusted_users_list){
+    var open_task_text = '<form id="trust-user-remove-form" class="searchContainer" action="#" title="Remove Trusted Users">\n\
+                            <div class="row" style="margin-top:30px">\n\
+                                <table id="removeTrustTable" class="display" cellspacing="0" width="100%" border="1" >\n\
+                                    <thead>\n\
+                                        <tr>\n\
+                                            <th>Id</th>\n\
+                                            <th>Username</th>\n\
+                                            <th>Credibility</th>\n\
+                                            <th>Action</th>\n\
+                                        </tr>\n\
+                                    </thead>\n\
+                                    <tbody id="table_body">\n\
+                                </table>\
+                            </div>\n\
+                            </form>';
+    
+    $('#dialog_container').append(open_task_text);
+    var dialog = $( "#trust-user-remove-form" ).dialog({        
+      width : 550,
+      height : 300,
+      minWidth: 410,
+      minHeight: 210,
+      modal: true,
+      buttons: {
+        Cancel: function() {
+            dialog.dialog("close");
+        }
+      },
+      create: function(event, ui) { 
+        var widget = $(this).dialog("widget");
+        $(".ui-dialog-titlebar-close span", widget).removeClass("ui-icon-closethick").addClass("ui-icon-mine");
+        //console.log(trusted_users_list);
+        console.log(trusted_users_list.trustUsers[1]);
+        for (i=0;i<trusted_users_list.trustUsers.length;i++){
+                // Find the table and add rows
+                var table = document.getElementById("removeTrustTable");              
+                var row = table.insertRow(document.getElementById("removeTrustTable").rows.length);
+                var cell1 = row.insertCell(0);
+                var cell2 = row.insertCell(1);
+                var cell3 = row.insertCell(2);
+                var cell4 = row.insertCell(3);
+
+                cell1.style.cssText= 'text-align:center;';
+                cell1.innerHTML = trusted_users_list.trustUsers[i]["userId"];
+
+                cell2.style.cssText= 'text-align:center;';
+                cell2.innerHTML = trusted_users_list.trustUsers[i]["userName"];
+
+                cell3.style.cssText= 'text-align:center;';
+                cell3.innerHTML = trusted_users_list.trustUsers[i]["userScore"]+"%";
+
+                cell4.style.cssText= 'text-align:center;';
+                cell4.innerHTML = "<button onclick='removeTrust(this)' id=" +
+                        trusted_users_list.trustUsers[i]["userId"] + " type='button'>Remove Trust</button>"; 
+  
+            }   
+      }
+      ,close: function(event, ui) { $(this).remove(); }
+    });
+}
+
+//answer to a trust request
+function removeTrust(x) {
+    var row_number = 0;
+    for(i=1;i<document.getElementById("removeTrustTable").rows.length;i++){
+        if(x.id === document.getElementById("removeTrustTable").rows[i].cells[0].innerText){
+            row_number = i;
+            break;
+        }
+    }
+    
+    var userId = document.getElementById("removeTrustTable").rows[row_number].cells[0].innerText;
+    var userName = document.getElementById("removeTrustTable").rows[row_number].cells[1].innerText;
+    var r = confirm("Are you sure that you want to accept a trust request from user \""+userName+"\" ?");
+
+    if (r){ 
+        $.ajax( {
+            url: 'RemoveTrust',
+            type: 'POST',
+            data: {userId: userId},
+            beforeSend: function(xhr){
+                    xhr.setRequestHeader("X-XSRF-TOKEN", csrftoken);
+            }
+          } ).done(function(responseText) {
+            var obj = $.parseJSON(responseText); 
+            if(obj.hasOwnProperty("exception")){
+                alert(obj.exception);                    
+            } 
+            else{      
+                alert(obj.msg);
+                //delete a single row from the table
+                document.getElementById("removeTrustTable").deleteRow(row_number);           }
+        });
+    }
+}
+
+// working - xarchakos
 //pop up window for answering trust users requests
 function createAnswerTrustUserRequestPopup(){
     var open_task_text = '<form id="trust-user-request-form" class="searchContainer" action="#" title="Answer Trust Requests">\n\
@@ -3810,6 +3909,25 @@ $(document).ready(function(){
                 }
                 else {                    
                     createOpenUsersTasksPopup(obj);                    
+                }
+            });
+    });
+    
+    $( "#removeUsers" ).click(function() {
+        $.ajax( {
+                url: 'ListUsers',
+                type: 'POST',
+                data: {},
+                beforeSend: function(xhr){
+                        xhr.setRequestHeader("X-XSRF-TOKEN", csrftoken);
+                }
+              } ).done(function(responseText) {
+                var obj = $.parseJSON(responseText); 
+                if(obj.hasOwnProperty("exception")){
+                    alert(obj.exception);                    
+                }
+                else {
+                    removeTrustedUsersPopup(obj);                  
                 }
             });
     });
