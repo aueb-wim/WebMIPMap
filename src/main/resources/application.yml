@@ -27,6 +27,6 @@ spring:
   datasource:      
     platform: postgres
     driverClassName: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/mipmapusers
+    url: jdbc:postgresql://${DB_IP}:5432/mipmapusers
     username: webmipmap
     password: webmipmap

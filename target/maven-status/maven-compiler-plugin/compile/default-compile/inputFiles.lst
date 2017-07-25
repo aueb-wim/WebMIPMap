@@ -23,6 +23,7 @@
 /home/ioannisxar/Dropbox/WebMIPMap/WebMIPMapSpring/src/main/java/gr/aueb/users/MipMapUser.java
 /home/ioannisxar/Dropbox/WebMIPMap/WebMIPMapSpring/src/main/java/gr/aueb/mipmapgui/view/wizard/pm/XMLConfigurationPM.java
 /home/ioannisxar/Dropbox/WebMIPMap/WebMIPMapSpring/src/main/java/gr/aueb/mipmapgui/controller/file/ActionSelectMappingTask.java
+/home/ioannisxar/Dropbox/WebMIPMap/WebMIPMapSpring/src/main/java/gr/aueb/users/recommendation/mappingmodel/UserMappingCorrespondences.java
 /home/ioannisxar/Dropbox/WebMIPMap/WebMIPMapSpring/src/main/java/gr/aueb/mipmapgui/view/tree/ActionSelectionCondition.java
 /home/ioannisxar/Dropbox/WebMIPMap/WebMIPMapSpring/src/main/java/gr/aueb/mipmapgui/controller/file/ActionCleanDirectory.java
 /home/ioannisxar/Dropbox/WebMIPMap/WebMIPMapSpring/src/main/java/gr/aueb/connection/ActionJoinConditionChangeOptions.java
@@ -52,12 +53,13 @@
 /home/ioannisxar/Dropbox/WebMIPMap/WebMIPMapSpring/src/main/java/gr/aueb/mipmapgui/view/tree/ActionDuplicateNode.java
 /home/ioannisxar/Dropbox/WebMIPMap/WebMIPMapSpring/src/main/java/gr/aueb/controllers/CustomLoginUrlAuthenticationEntryPoint.java
 /home/ioannisxar/Dropbox/WebMIPMap/WebMIPMapSpring/src/main/java/gr/aueb/mipmapgui/controller/datasource/ActionViewSchema.java
-/home/ioannisxar/Dropbox/WebMIPMap/WebMIPMapSpring/src/main/java/gr/aueb/users/recommendation/GetCorrespondenceScore.java
 /home/ioannisxar/Dropbox/WebMIPMap/WebMIPMapSpring/src/main/java/gr/aueb/mipmapgui/controller/file/ActionDeleteMappingTask.java
 /home/ioannisxar/Dropbox/WebMIPMap/WebMIPMapSpring/src/main/java/gr/aueb/mipmapgui/controller/file/ActionSaveMappingTask.java
 /home/ioannisxar/Dropbox/WebMIPMap/WebMIPMapSpring/src/main/java/gr/aueb/mipmapgui/controller/file/ActionNewMappingTask.java
 /home/ioannisxar/Dropbox/WebMIPMap/WebMIPMapSpring/src/main/java/gr/aueb/mipmapgui/view/configuration/EngineConfigurationPM.java
 /home/ioannisxar/Dropbox/WebMIPMap/WebMIPMapSpring/src/main/java/gr/aueb/connection/ActionNewJoinCondition.java
+/home/ioannisxar/Dropbox/WebMIPMap/WebMIPMapSpring/src/main/java/gr/aueb/users/ActionDeleteTrustedUser.java
+/home/ioannisxar/Dropbox/WebMIPMap/WebMIPMapSpring/src/main/java/gr/aueb/users/recommendation/GetRecommendedCorrespondences.java
 /home/ioannisxar/Dropbox/WebMIPMap/WebMIPMapSpring/src/main/java/gr/aueb/mipmapgui/view/wizard/pm/NewMappingTaskPM.java
 /home/ioannisxar/Dropbox/WebMIPMap/WebMIPMapSpring/src/main/java/gr/aueb/mipmapgui/controller/datasource/ActionViewJoinConditions.java
 /home/ioannisxar/Dropbox/WebMIPMap/WebMIPMapSpring/src/main/java/gr/aueb/users/ActionAnswerTrustRequest.java

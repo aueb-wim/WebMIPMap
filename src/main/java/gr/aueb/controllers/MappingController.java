@@ -6,6 +6,7 @@ import gr.aueb.connection.ActionJoinConditionChangeOptions;
 import gr.aueb.connection.ActionNewConnection;
 import gr.aueb.connection.ActionNewJoinCondition;
 import gr.aueb.mipmapgui.Costanti;
+import static gr.aueb.mipmapgui.Costanti.SERVER_MAIN_FOLDER;
 import gr.aueb.mipmapgui.controller.Scenario;
 import gr.aueb.mipmapgui.controller.file.ActionLoadTrustedUserMappings;
 import gr.aueb.mipmapgui.controller.file.ActionDeleteMappingTask;
@@ -62,7 +63,7 @@ public class MappingController {
     //@ResponseBody
     public String initializeInfo(Principal principal) {
         MappingController.user = principal.getName();
-        
+
         initialize();
         ActionInitialize actionInitialize = new ActionInitialize();
         actionInitialize.performAction(user);

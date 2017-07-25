@@ -17,6 +17,7 @@ package gr.aueb.controllers;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.web.SpringBootServletInitializer;
 
 @SpringBootApplication
@@ -26,4 +27,9 @@ public class WebMIPMapApplication extends SpringBootServletInitializer {
 	SpringApplication.run(WebMIPMapApplication.class, args);
     }
 
+    @Override
+    protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
+                    return application.sources(WebMIPMapApplication.class);
+    }
+    
 }

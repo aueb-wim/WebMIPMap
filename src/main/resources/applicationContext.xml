@@ -8,7 +8,7 @@
     
     <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
            <property name="driverClassName" value="org.postgresql.Driver"/>
-           <property name="url" value="jdbc:postgresql://localhost:5432/mipmapusers"/>
+           <property name="url" value="jdbc:postgresql://#{systemEnvironment['DB_IP']}:5432/mipmapusers"/>
            <property name="username" value="webmipmap"/>
            <property name="password" value="webmipmap"/>
     </bean>
