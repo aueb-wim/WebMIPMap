@@ -31,12 +31,26 @@ public class ActionInitialize {
     public ActionInitialize() {}
     
     public void performAction(String user) {
+        initializeUserInDB(user);
         getSavedUserFiles(user);
         getSavedSchemata();
         getGlobalFiles();
         getPublicFiles(user);
         getUserList(user);
         getPendingRequests(user);
+    }
+    
+    private void initializeUserInDB (String user) {
+        Integer id = jdbcTemplate.queryForObject("select count (*) from mipmapuser where username = '" + user + "'", Integer.class);
+        if ( id == 0 ) { 
+            Integer max = jdbcTemplate.queryForObject("select max(id) from mipmapuser", Integer.class);
+            if (max==null)
+                max = 0;
+            jdbcTemplate.update("INSERT INTO mipmapuser (id, username, role , score, mappings_accepted, mappings_total) "
+                    + "values (" + (++max) + ", '" + user + "','user',0.0, 0, 0) ");
+//                            + "on conflict (username) "
+//                            + "do nothing");
+        }
     }
     
     private void getPendingRequests(String user){
